@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useCurrencyLanguage } from '../context/CurrencyLanguageContext';
 import { supabase } from '../lib/supabase';
-import { CreditCard, Lock, CheckCircle } from 'lucide-react';
+import { CreditCard, Lock, CheckCircle, ArrowRight, Shield, Truck, RefreshCw, ShoppingBag } from 'lucide-react';
 import TelegramService from '../services/telegramService';
 import { TELEGRAM_CONFIG } from '../config/telegram';
 
@@ -206,16 +206,22 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
 
   if (cart.length === 0 && !orderComplete) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Your cart is empty</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-8">Add some items to proceed to checkout</p>
-          <button
-            onClick={() => onNavigate('products')}
-            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium"
-          >
-            Continue Shopping
-          </button>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-16">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="text-center bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-12 border border-gray-200 dark:border-gray-700">
+            <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+              <ShoppingBag size={48} className="text-gray-400" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Your cart is empty</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg">Add some items to proceed to checkout</p>
+            <button
+              onClick={() => onNavigate('products')}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 font-semibold transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              Continue Shopping
+              <ArrowRight size={20} />
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -223,40 +229,64 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
 
   if (orderComplete) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-          <CheckCircle size={80} className="mx-auto text-green-500 mb-6" />
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Order Confirmed!</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-2">Thank you for your purchase</p>
-          <p className="text-sm text-gray-500 dark:text-gray-500 mb-8">Order ID: {orderId}</p>
-          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 mb-8">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">What's Next?</h3>
-            <ul className="text-left text-gray-600 dark:text-gray-400 space-y-2">
-              <li>• You will receive an order confirmation email shortly</li>
-              <li>• Your order will be processed within 1-2 business days</li>
-              <li>• Shipping typically takes 3-5 business days</li>
-            </ul>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-16">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center border border-gray-200 dark:border-gray-700">
+            <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle size={48} className="text-green-600 dark:text-green-400" />
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">Order Confirmed!</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">Thank you for your purchase</p>
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-6 inline-block">
+              <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">Order ID</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{orderId}</p>
+            </div>
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 mb-8 text-left border border-blue-200 dark:border-blue-800">
+              <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <Truck className="text-blue-600 dark:text-blue-400" size={20} />
+                What's Next?
+              </h3>
+              <ul className="space-y-3 text-gray-700 dark:text-gray-300">
+                <li className="flex items-start gap-3">
+                  <span className="text-blue-600 dark:text-blue-400 font-bold mt-0.5">✓</span>
+                  <span>You will receive an order confirmation email shortly</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-blue-600 dark:text-blue-400 font-bold mt-0.5">✓</span>
+                  <span>Your order will be processed within 1-2 business days</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-blue-600 dark:text-blue-400 font-bold mt-0.5">✓</span>
+                  <span>Shipping typically takes 3-5 business days</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              onClick={() => onNavigate('products')}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 font-semibold transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              Continue Shopping
+              <ArrowRight size={20} />
+            </button>
           </div>
-          <button
-            onClick={() => onNavigate('products')}
-            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium"
-          >
-            Continue Shopping
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Checkout</h1>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Contact Information</h2>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">Checkout</h1>
+          <p className="text-gray-600 dark:text-gray-400">Complete your order securely</p>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Contact Information</h2>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -269,13 +299,13 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="john.doe@example.com"
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Shipping Address</h2>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -290,7 +320,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                       value={formData.firstName}
                       onChange={handleInputChange}
                       placeholder="John"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                   </div>
                   <div>
@@ -389,7 +419,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <CreditCard size={24} />
                 Payment Information
@@ -460,24 +490,34 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <Lock size={16} />
-                <span>Your payment information is encrypted and secure</span>
+              <div className="mt-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                <Lock size={16} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <span className="font-medium">Your payment information is encrypted and secure</span>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-medium text-lg transition-all disabled:opacity-50"
+              className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 font-semibold text-lg transition-all disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-100 flex items-center justify-center gap-2"
             >
-              {loading ? 'Processing...' : `Pay ${formatPrice(total)}`}
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white dark:border-gray-900 border-t-transparent rounded-full animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Lock size={20} />
+                  Pay {formatPrice(total)}
+                </>
+              )}
             </button>
           </form>
         </div>
 
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 sticky top-24">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 sticky top-24 border border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Order Summary</h2>
             
             <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
@@ -506,24 +546,61 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
               })}
             </div>
 
-            <div className="space-y-2 mb-4">
+            <div className="space-y-3 mb-4">
               <div className="flex justify-between text-gray-600 dark:text-gray-400">
                 <span>Subtotal</span>
-                <span>{formatPrice(subtotal)}</span>
+                <span className="font-semibold text-gray-900 dark:text-white">{formatPrice(subtotal)}</span>
               </div>
               <div className="flex justify-between text-gray-600 dark:text-gray-400">
                 <span>Shipping</span>
-                <span>{formatPrice(shipping)}</span>
+                <span className="font-semibold text-gray-900 dark:text-white">
+                  {shipping === 0 ? (
+                    <span className="text-green-600 dark:text-green-400">FREE</span>
+                  ) : (
+                    formatPrice(shipping)
+                  )}
+                </span>
               </div>
               <div className="flex justify-between text-gray-600 dark:text-gray-400">
                 <span>Tax</span>
-                <span>{formatPrice(tax)}</span>
+                <span className="font-semibold text-gray-900 dark:text-white">{formatPrice(tax)}</span>
               </div>
             </div>
 
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between text-xl font-bold text-gray-900 dark:text-white">
-              <span>Total</span>
-              <span>{formatPrice(total)}</span>
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex justify-between">
+              <span className="text-lg font-bold text-gray-900 dark:text-white">Total</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">{formatPrice(total)}</span>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
+              <div className="flex items-center gap-3 text-sm">
+                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Shield size={16} className="text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 dark:text-white">Secure Checkout</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">256-bit SSL encryption</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Truck size={16} className="text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 dark:text-white">Free Shipping</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">On orders over {formatPrice(50)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-sm">
+                <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                  <RefreshCw size={16} className="text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 dark:text-white">Easy Returns</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">30-day return policy</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -15,16 +15,16 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
   };
 
   return (
-    <footer className="bg-black dark:bg-gray-950 text-white border-t-4 border-red-600">
+    <footer className="bg-gray-900 dark:bg-gray-950 text-white border-t border-gray-800 dark:border-gray-800">
       {/* Newsletter Section */}
-      <div className="bg-gradient-to-r from-red-600 to-orange-600 py-12">
+      <div className="bg-gradient-to-r from-gray-800 to-gray-900 dark:from-gray-900 dark:to-gray-950 py-12 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-center md:text-left">
-              <h3 className="text-3xl font-black mb-2 uppercase">
-                Join Our Mailing List!
+              <h3 className="text-2xl md:text-3xl font-bold mb-2">
+                Join Our Mailing List
               </h3>
-              <p className="text-lg font-medium opacity-90">
+              <p className="text-gray-300 text-base">
                 Get exclusive deals, early access & special offers!
               </p>
             </div>
@@ -35,13 +35,13 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="flex-1 px-6 py-3 rounded-lg bg-white text-black font-medium focus:outline-none focus:ring-2 focus:ring-white"
+                  className="flex-1 px-4 py-3 rounded-lg bg-white text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-white text-sm"
                 />
                 <button
                   onClick={handleSubscribe}
-                  className="bg-black text-white px-8 py-3 rounded-lg font-black hover:bg-gray-900 transition-colors uppercase whitespace-nowrap"
+                  className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors whitespace-nowrap text-sm"
                 >
-                  Join Now
+                  Subscribe
                 </button>
               </div>
             </div>
@@ -54,29 +54,29 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Company Info */}
           <div>
-            <h3 className="text-2xl font-black mb-4 uppercase tracking-tight">
-              HTS <span className="text-red-600">SWAG</span>
+            <h3 className="text-xl font-bold mb-4">
+              HTS <span className="text-red-500">SWAG</span>
             </h3>
-            <p className="text-gray-300 mb-6 font-medium leading-relaxed">
+            <p className="text-gray-400 mb-6 text-sm leading-relaxed">
               Your premium destination for quality merchandise, custom designs, and exclusive gift cards. 
               Screen printing, embroidery, signs & more!
             </p>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-gray-300">
-                <Mail size={18} className="text-red-600" />
-                <a href="mailto:support@htswag.com" className="hover:text-white transition-colors font-medium">
+              <div className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors">
+                <Mail size={16} className="text-red-500 flex-shrink-0" />
+                <a href="mailto:support@htswag.com" className="text-sm">
                   support@htswag.com
                 </a>
               </div>
-              <div className="flex items-center gap-3 text-gray-300">
-                <Phone size={18} className="text-red-600" />
-                <a href="tel:1-800-9101-4356" className="hover:text-white transition-colors font-medium">
+              <div className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors">
+                <Phone size={16} className="text-red-500 flex-shrink-0" />
+                <a href="tel:1-800-9101-4356" className="text-sm">
                   1-800-9101-4356
                 </a>
               </div>
-              <div className="flex items-start gap-3 text-gray-300">
-                <MapPin size={18} className="text-red-600 mt-1 flex-shrink-0" />
-                <span className="font-medium">
+              <div className="flex items-start gap-3 text-gray-400">
+                <MapPin size={16} className="text-red-500 mt-1 flex-shrink-0" />
+                <span className="text-sm">
                   123 Commerce Street<br />
                   Business City, ST 12345<br />
                   United States
@@ -87,14 +87,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
 
           {/* Shop Links */}
           <div>
-            <h4 className="text-lg font-black mb-4 uppercase border-b-2 border-red-600 pb-2">
+            <h4 className="text-base font-bold mb-4 text-white">
               Shop
             </h4>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               <li>
                 <button
                   onClick={() => onNavigate('products')}
-                  className="text-gray-300 hover:text-white transition-colors font-medium hover:translate-x-1 inline-block"
+                  className="text-gray-400 hover:text-white transition-colors text-sm hover:translate-x-1 inline-block"
                 >
                   All Products
                 </button>
@@ -102,7 +102,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
               <li>
                 <button
                   onClick={() => onNavigate('gift-cards')}
-                  className="text-gray-300 hover:text-white transition-colors font-medium hover:translate-x-1 inline-block"
+                  className="text-gray-400 hover:text-white transition-colors text-sm hover:translate-x-1 inline-block"
                 >
                   Gift Cards
                 </button>
@@ -110,15 +110,15 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
               <li>
                 <button
                   onClick={() => onNavigate('deals')}
-                  className="text-gray-300 hover:text-white transition-colors font-medium hover:translate-x-1 inline-block"
+                  className="text-gray-400 hover:text-white transition-colors text-sm hover:translate-x-1 inline-block"
                 >
-                  Hot Deals 🔥
+                  Hot Deals
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => onNavigate('products')}
-                  className="text-gray-300 hover:text-white transition-colors font-medium hover:translate-x-1 inline-block"
+                  className="text-gray-400 hover:text-white transition-colors text-sm hover:translate-x-1 inline-block"
                 >
                   Custom Orders
                 </button>
@@ -128,14 +128,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
 
           {/* Customer Service */}
           <div>
-            <h4 className="text-lg font-black mb-4 uppercase border-b-2 border-red-600 pb-2">
+            <h4 className="text-base font-bold mb-4 text-white">
               Support
             </h4>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               <li>
                 <button
                   onClick={() => onNavigate('tracking')}
-                  className="text-gray-300 hover:text-white transition-colors font-medium hover:translate-x-1 inline-block"
+                  className="text-gray-400 hover:text-white transition-colors text-sm hover:translate-x-1 inline-block"
                 >
                   Track Order
                 </button>
@@ -143,7 +143,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
               <li>
                 <button
                   onClick={() => onNavigate('terms')}
-                  className="text-gray-300 hover:text-white transition-colors font-medium hover:translate-x-1 inline-block"
+                  className="text-gray-400 hover:text-white transition-colors text-sm hover:translate-x-1 inline-block"
                 >
                   Terms of Service
                 </button>
@@ -151,7 +151,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
               <li>
                 <button
                   onClick={() => onNavigate('privacy')}
-                  className="text-gray-300 hover:text-white transition-colors font-medium hover:translate-x-1 inline-block"
+                  className="text-gray-400 hover:text-white transition-colors text-sm hover:translate-x-1 inline-block"
                 >
                   Privacy Policy
                 </button>
@@ -159,7 +159,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
               <li>
                 <button
                   onClick={() => onNavigate('home')}
-                  className="text-gray-300 hover:text-white transition-colors font-medium hover:translate-x-1 inline-block"
+                  className="text-gray-400 hover:text-white transition-colors text-sm hover:translate-x-1 inline-block"
                 >
                   Contact Us
                 </button>
@@ -169,41 +169,45 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
 
           {/* Business Hours & Social */}
           <div>
-            <h4 className="text-lg font-black mb-4 uppercase border-b-2 border-red-600 pb-2">
+            <h4 className="text-base font-bold mb-4 text-white">
               Connect
             </h4>
             <div className="mb-6">
-              <p className="text-sm font-bold text-gray-400 uppercase mb-2">Customer Service Hours</p>
-              <p className="text-gray-300 font-medium text-sm mb-1">M-F: 9am - 5pm EST</p>
-              <p className="text-gray-300 font-medium text-sm mb-1">Sat: 9am - 2pm EST</p>
-              <p className="text-gray-300 font-medium text-sm">Sun: Closed</p>
+              <p className="text-xs font-semibold text-gray-400 uppercase mb-2">Customer Service Hours</p>
+              <p className="text-gray-400 text-sm mb-1">M-F: 9am - 5pm EST</p>
+              <p className="text-gray-400 text-sm mb-1">Sat: 9am - 2pm EST</p>
+              <p className="text-gray-400 text-sm">Sun: Closed</p>
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-400 uppercase mb-3">Follow Us</p>
-              <div className="flex gap-3">
+              <p className="text-xs font-semibold text-gray-400 uppercase mb-3">Follow Us</p>
+              <div className="flex gap-2">
                 <a
                   href="#"
-                  className="w-10 h-10 bg-white/10 hover:bg-red-600 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  className="w-9 h-9 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  aria-label="Facebook"
                 >
-                  <Facebook size={20} />
+                  <Facebook size={18} />
                 </a>
                 <a
                   href="#"
-                  className="w-10 h-10 bg-white/10 hover:bg-red-600 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  className="w-9 h-9 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  aria-label="Instagram"
                 >
-                  <Instagram size={20} />
+                  <Instagram size={18} />
                 </a>
                 <a
                   href="#"
-                  className="w-10 h-10 bg-white/10 hover:bg-red-600 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  className="w-9 h-9 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  aria-label="Twitter"
                 >
-                  <Twitter size={20} />
+                  <Twitter size={18} />
                 </a>
                 <a
                   href="#"
-                  className="w-10 h-10 bg-white/10 hover:bg-red-600 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  className="w-9 h-9 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  aria-label="YouTube"
                 >
-                  <Youtube size={20} />
+                  <Youtube size={18} />
                 </a>
               </div>
             </div>
@@ -212,14 +216,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
 
         {/* Payment Methods */}
         <div className="border-t border-gray-800 pt-8 mb-8">
-          <p className="text-center text-sm font-bold text-gray-400 uppercase mb-4">
+          <p className="text-center text-xs font-semibold text-gray-400 uppercase mb-4">
             We Accept
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-4">
+          <div className="flex flex-wrap justify-center items-center gap-3">
             {['Visa', 'Mastercard', 'Discover', 'American Express', 'PayPal', 'Apple Pay'].map((payment) => (
               <div
                 key={payment}
-                className="bg-white px-4 py-2 rounded text-black font-black text-sm"
+                className="bg-gray-800 px-3 py-1.5 rounded text-white font-semibold text-xs border border-gray-700"
               >
                 {payment}
               </div>
@@ -229,14 +233,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
 
         {/* Copyright */}
         <div className="border-t border-gray-800 pt-8 text-center">
-          <p className="text-gray-400 font-medium mb-2">
-            COPYRIGHT © {new Date().getFullYear()} <span className="font-black text-white">HTS SWAG</span> BY <span className="font-black text-red-600">HTS LLC</span> - ALL RIGHTS RESERVED
+          <p className="text-gray-400 text-sm mb-2">
+            © {new Date().getFullYear()} <span className="font-semibold text-white">HTS SWAG</span> by <span className="font-semibold text-red-500">HTS LLC</span> - All Rights Reserved
           </p>
-          <p className="text-gray-500 text-sm font-medium">
-            ©ALL DESIGNS & IMAGES ARE COPYRIGHTED BY HTS LLC, HTS SWAG® ALL RIGHTS RESERVED.
-          </p>
-          <p className="text-gray-600 text-xs mt-4 font-medium">
-            Made with ❤️ for awesome customers
+          <p className="text-gray-500 text-xs">
+            All designs & images are copyrighted by HTS LLC, HTS SWAG® All Rights Reserved.
           </p>
         </div>
       </div>
