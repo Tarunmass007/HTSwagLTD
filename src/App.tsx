@@ -9,8 +9,8 @@ import { CategoriesPage } from './pages/CategoriesPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
-import { Footer } from './components/Footer';
-import { AdminPanel } from './pages/AdminPanel';
+import { Footer } from './components/footer';
+import { AdminPanel } from './pages/adminpanel';
 
 type Page = 'home' | 'categories' | 'products' | 'cart' | 'checkout' | 'terms' | 'privacy' | 'tracking' | 'admin';
 
