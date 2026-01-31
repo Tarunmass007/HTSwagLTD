@@ -219,15 +219,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
           <p className="text-center text-xs font-semibold text-gray-400 uppercase mb-4">
             We Accept
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-3">
-            {['Visa', 'Mastercard', 'Discover', 'American Express', 'PayPal', 'Apple Pay'].map((payment) => (
-              <div
-                key={payment}
-                className="bg-gray-800 px-3 py-1.5 rounded text-white font-semibold text-xs border border-gray-700"
-              >
-                {payment}
-              </div>
-            ))}
+          <div className="flex justify-center">
+            <div className="inline-flex items-center justify-center rounded-xl border-2 border-white/20 bg-white px-4 py-3 shadow-lg">
+              <img
+                src="https://cdn.shopify.com/s/files/1/1140/8418/t/2/assets/payments.png?12188859156103486521"
+                alt="We accept Visa, Mastercard, Discover, American Express, PayPal, Amazon Payments"
+                className="h-8 w-auto max-w-full object-contain"
+              />
+            </div>
           </div>
         </div>
 

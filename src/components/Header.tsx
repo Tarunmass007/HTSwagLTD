@@ -1,5 +1,6 @@
 // src/components/Header.tsx
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, ShoppingCart, User, ChevronDown, Moon, Sun, Menu, X, Home, Package, Gift, Flame, Grid } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeProvider';
@@ -25,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [authMessage, setAuthMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const userMenuRef = useRef<HTMLDivElement>(null);
   const langMenuRef = useRef<HTMLDivElement>(null);
@@ -50,22 +52,37 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setAuthMessage(null);
 
     try {
       if (authMode === 'signup') {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp(
+          { email, password },
+          { emailRedirectTo: `${window.location.origin}/` }
+        );
         if (error) throw error;
-        alert('Account created! Please check your email to verify.');
-        setAuthMode('login');
+        setAuthMessage({
+          type: 'success',
+          text: data?.user && !data?.session
+            ? 'Account created! Please check your email to confirm your account, then sign in.'
+            : 'Account created! You can sign in now.',
+        });
+        setPassword('');
+        if (data?.session) {
+          setShowAuthModal(false);
+          setEmail('');
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         setShowAuthModal(false);
         setEmail('');
         setPassword('');
+        setAuthMessage(null);
       }
-    } catch (error: any) {
-      alert(error.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Something went wrong';
+      setAuthMessage({ type: 'error', text: message });
     } finally {
       setLoading(false);
     }
@@ -375,73 +392,115 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
         )}
       </header>
 
-      {/* Auth Modal */}
-      {showAuthModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-8 border border-gray-200 dark:border-gray-700 animate-slide-up">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {authMode === 'login' ? 'Welcome Back' : 'Create Account'}
-              </h2>
-              <button
-                onClick={() => setShowAuthModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            <form onSubmit={handleAuth} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white transition-all"
-                  placeholder="your@email.com"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white transition-all"
-                  placeholder="••••••••"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold py-3 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50 shadow-lg hover:shadow-xl"
-              >
-                {loading ? 'Loading...' : authMode === 'login' ? 'Log In' : 'Sign Up'}
-              </button>
-
-              <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
-                {authMode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+      {/* Auth Modal - rendered in portal so it always appears on top */}
+      {showAuthModal &&
+        createPortal(
+          <div
+            className="fixed inset-0 flex items-center justify-center p-4 bg-black/60"
+            style={{ zIndex: 9999 }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowAuthModal(false);
+                setAuthMessage(null);
+              }
+            }}
+          >
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="auth-modal-title"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-8 border border-gray-200 dark:border-gray-700"
+              style={{ zIndex: 10000 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 id="auth-modal-title" className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {authMode === 'login' ? 'Welcome Back' : 'Create Account'}
+                </h2>
                 <button
                   type="button"
-                  onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
-                  className="text-gray-900 dark:text-white font-semibold hover:underline"
+                  onClick={() => {
+                    setShowAuthModal(false);
+                    setAuthMessage(null);
+                  }}
+                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded"
+                  aria-label="Close"
                 >
-                  {authMode === 'login' ? 'Sign Up' : 'Log In'}
+                  <X size={24} />
                 </button>
-              </p>
-            </form>
-          </div>
-        </div>
-      )}
+              </div>
+
+              <form onSubmit={handleAuth} className="space-y-4">
+                <div>
+                  <label htmlFor="auth-email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Email
+                  </label>
+                  <input
+                    id="auth-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                    placeholder="your@email.com"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="auth-password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Password
+                  </label>
+                  <input
+                    id="auth-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                {authMessage && (
+                  <div
+                    className={`p-3 rounded-lg text-sm ${
+                      authMessage.type === 'success'
+                        ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800'
+                        : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'
+                    }`}
+                  >
+                    {authMessage.text}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                >
+                  {loading ? 'Please wait...' : authMode === 'login' ? 'Log In' : 'Sign Up'}
+                </button>
+
+                <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
+                  {authMode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMode(authMode === 'login' ? 'signup' : 'login');
+                      setAuthMessage(null);
+                    }}
+                    className="text-red-600 dark:text-red-400 font-semibold hover:underline"
+                  >
+                    {authMode === 'login' ? 'Sign Up' : 'Log In'}
+                  </button>
+                </p>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
     </>
   );
 };

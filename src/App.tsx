@@ -12,7 +12,7 @@ import { CheckoutPage } from './pages/CheckoutPage';
 import { Footer } from './components/footer';
 import { AdminPanel } from './pages/adminpanel';
 
-type Page = 'home' | 'categories' | 'products' | 'cart' | 'checkout' | 'terms' | 'privacy' | 'tracking' | 'admin';
+type Page = 'home' | 'categories' | 'products' | 'cart' | 'checkout' | 'terms' | 'privacy' | 'tracking' | 'admin' | 'gift-cards' | 'deals';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -53,6 +53,10 @@ function App() {
         return <CategoriesPage onNavigate={handleNavigate} />;
       case 'products':
         return <ProductsPage searchQuery={searchQuery} category={selectedCategory} />;
+      case 'gift-cards':
+        return <ProductsPage searchQuery={searchQuery} category="gift-cards" />;
+      case 'deals':
+        return <ProductsPage searchQuery={searchQuery} category="deals" />;
       case 'cart':
         return <CartPage onNavigate={handleNavigate} />;
       case 'checkout':

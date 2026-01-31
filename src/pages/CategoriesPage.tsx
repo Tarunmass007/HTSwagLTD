@@ -1,7 +1,7 @@
 // src/pages/CategoriesPage.tsx
 import React from 'react';
 import { CategoryCard } from '../components/CategoryCard';
-import { productCategories } from '../types/categories';
+import { productCategories } from '../Types/categories';
 import { Package, Sparkles } from 'lucide-react';
 
 interface CategoriesPageProps {

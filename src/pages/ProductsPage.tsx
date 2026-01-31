@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { supabase, Product } from '../lib/supabase';
+import { supabase, Product, isSupabaseConfigured } from '../lib/supabase';
 import { ProductCard } from '../components/ProductCard';
-import { Package, Grid, List, Filter } from 'lucide-react';
-import { productCategories } from '../types/categories';
+import { Package, Grid, List, Filter, AlertTriangle } from 'lucide-react';
+import { productCategories } from '../Types/categories';
 
 interface ProductsPageProps {
   searchQuery?: string;
@@ -12,6 +12,7 @@ interface ProductsPageProps {
 export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', category }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high' | 'name'>('newest');
 
@@ -20,28 +21,27 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', ca
   }, []);
 
   useEffect(() => {
-    let filtered = products;
+    let filtered = [...products];
 
-    // Filter by category
+    // Filter by category (use DB category slug, e.g. 'gift-cards', 'tops')
     if (category && category !== 'all') {
-      const categoryData = productCategories.find(cat => cat.id === category);
-      if (categoryData) {
-        filtered = filtered.filter(product =>
-          product.name.toLowerCase().includes(categoryData.name.toLowerCase()) ||
-          product.description.toLowerCase().includes(categoryData.name.toLowerCase())
-        );
+      if (category === 'deals') {
+        filtered = filtered.filter((p) => p.featured === true);
+      } else {
+        filtered = filtered.filter((p) => p.category === category);
       }
     }
 
     // Filter by search query
     if (searchQuery.trim()) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase())
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
       );
     }
 
-    // Sort products
+    // Sort
     switch (sortBy) {
       case 'price-low':
         filtered.sort((a, b) => a.price - b.price);
@@ -62,16 +62,35 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', ca
 
   const fetchProducts = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
+    setError(null);
+    try {
+      if (!isSupabaseConfigured) {
+        setError('Store is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env');
+        setProducts([]);
+        setFilteredProducts([]);
+        return;
+      }
+      const { data, error: fetchError } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (!error && data) {
-      setProducts(data);
-      setFilteredProducts(data);
+      if (fetchError) {
+        setError(fetchError.message || 'Failed to load products');
+        setProducts([]);
+        setFilteredProducts([]);
+        return;
+      }
+      setProducts(data ?? []);
+      setFilteredProducts(data ?? []);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load products';
+      setError(message);
+      setProducts([]);
+      setFilteredProducts([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const getCategoryName = () => {
@@ -88,8 +107,27 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', ca
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-16 w-16 border-4 border-red-600 border-t-transparent"></div>
+      <div className="flex flex-col items-center justify-center min-h-96 gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent" />
+        <p className="text-gray-600 dark:text-gray-400 font-medium">Loading products...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-96 flex flex-col items-center justify-center px-4">
+        <div className="max-w-md w-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-8 text-center">
+          <AlertTriangle size={48} className="text-amber-600 dark:text-amber-400 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Unable to load products</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm">{error}</p>
+          <button
+            onClick={fetchProducts}
+            className="px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+          >
+            Try again
+          </button>
+        </div>
       </div>
     );
   }

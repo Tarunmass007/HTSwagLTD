@@ -1,20 +1,91 @@
-import React from 'react';
-import { Gift, ShoppingBag, Sparkles, ArrowRight, Star, TrendingUp, Award, Zap } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Gift, ShoppingBag, Sparkles, ArrowRight, Star, TrendingUp, Award, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCurrencyLanguage } from '../context/CurrencyLanguageContext';
+import { testimonialsData } from '../data/testimonials';
 
 interface HomePageProps {
   searchQuery?: string;
   onNavigate: (page: string) => void;
 }
 
+const AUTO_SLIDE_INTERVAL_MS = 4500;
+
 export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const { t } = useCurrencyLanguage();
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
+
+  const goNext = useCallback(() => {
+    setTestimonialIndex((prev) => (prev + 1) % testimonialsData.length);
+  }, []);
+
+  const goPrev = useCallback(() => {
+    setTestimonialIndex((prev) => (prev - 1 + testimonialsData.length) % testimonialsData.length);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(goNext, AUTO_SLIDE_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [goNext]);
 
   return (
     <div className="bg-white dark:bg-gray-900">
       {/* Hero Section */}
       <section className="relative py-16 md:py-24 px-4 overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="max-w-7xl mx-auto relative z-10">
+          {/* Testimonials Carousel - product photos, auto-slide right to left */}
+          <div className="mb-12 md:mb-16">
+            <h2 className="text-center text-lg font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6">
+              What customers received
+            </h2>
+            <div className="relative flex items-center justify-center gap-2 md:gap-4">
+              <button
+                type="button"
+                onClick={goPrev}
+                aria-label="Previous testimonial"
+                className="absolute left-0 z-20 p-2 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors -translate-x-1 md:translate-x-0"
+              >
+                <ChevronLeft size={28} />
+              </button>
+              <div className="overflow-hidden w-full max-w-2xl mx-2 md:mx-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl bg-white dark:bg-gray-800">
+                <div
+                  className="flex transition-transform duration-500 ease-out"
+                  style={{ transform: `translateX(-${testimonialIndex * 100}%)` }}
+                >
+                  {testimonialsData.map((item) => (
+                    <div key={item.id} className="w-full flex-shrink-0 flex flex-col items-center p-4 md:p-6">
+                      <div className="w-full aspect-square max-h-64 md:max-h-80 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700">
+                        <img src={item.imageUrl} alt={item.productName} className="w-full h-full object-cover" />
+                      </div>
+                      <p className="mt-3 font-semibold text-gray-900 dark:text-white">{item.productName}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 italic">&ldquo;{item.quote}&rdquo;</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={goNext}
+                aria-label="Next testimonial"
+                className="absolute right-0 z-20 p-2 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors translate-x-1 md:translate-x-0"
+              >
+                <ChevronRight size={28} />
+              </button>
+            </div>
+            <div className="flex justify-center gap-1.5 mt-4">
+              {testimonialsData.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setTestimonialIndex(i)}
+                  aria-label={`Go to testimonial ${i + 1}`}
+                  className={`h-2 rounded-full transition-all ${
+                    i === testimonialIndex ? 'w-6 bg-red-600 dark:bg-red-500' : 'w-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
           <div className="text-center mb-12">
             <div className="inline-block mb-6">
               <span className="bg-red-600 text-white px-4 py-1.5 rounded-full font-semibold text-xs uppercase tracking-wide shadow-lg">

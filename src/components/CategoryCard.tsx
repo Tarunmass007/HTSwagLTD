@@ -1,7 +1,7 @@
 // src/components/CategoryCard.tsx
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import { ProductCategory } from '../types/categories';
+import { ProductCategory } from '../Types/categories';
 
 interface CategoryCardProps {
   category: ProductCategory;
