@@ -22,8 +22,6 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', ca
 
   useEffect(() => {
     let filtered = [...products];
-
-    // Filter by category (use DB category slug, e.g. 'gift-cards', 'tops')
     if (category && category !== 'all') {
       if (category === 'deals') {
         filtered = filtered.filter((p) => p.featured === true);
@@ -31,8 +29,6 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', ca
         filtered = filtered.filter((p) => p.category === category);
       }
     }
-
-    // Filter by search query
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -40,8 +36,6 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', ca
           p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
       );
     }
-
-    // Sort
     switch (sortBy) {
       case 'price-low':
         filtered.sort((a, b) => a.price - b.price);
@@ -52,20 +46,23 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', ca
       case 'name':
         filtered.sort((a, b) => a.name.localeCompare(b.name));
         break;
-      case 'newest':
       default:
         filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
-
     setFilteredProducts(filtered);
   }, [searchQuery, category, products, sortBy]);
+
+  const isDeployed = typeof window !== 'undefined' && !window.location.hostname.match(/^localhost$|^127\.0\.0\.1$/);
 
   const fetchProducts = async () => {
     setLoading(true);
     setError(null);
     try {
       if (!isSupabaseConfigured) {
-        setError('Store is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env');
+        const hint = isDeployed
+          ? ' On Vercel: add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Project → Settings → Environment Variables, then redeploy.'
+          : ' Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file.';
+        setError('Store is not configured.' + hint);
         setProducts([]);
         setFilteredProducts([]);
         return;
@@ -85,7 +82,11 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', ca
       setFilteredProducts(data ?? []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load products';
-      setError(message);
+      const isNetworkError = message.toLowerCase().includes('failed to fetch') || message.toLowerCase().includes('network');
+      const deployHint = isDeployed && isNetworkError
+        ? ' On Vercel: add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Project → Settings → Environment Variables, then redeploy.'
+        : '';
+      setError(message + deployHint);
       setProducts([]);
       setFilteredProducts([]);
     } finally {
@@ -107,8 +108,8 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', ca
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-96 gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent" />
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-6 py-16">
+        <div className="w-12 h-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
         <p className="text-gray-600 dark:text-gray-400 font-medium">Loading products...</p>
       </div>
     );
@@ -116,15 +117,12 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', ca
 
   if (error) {
     return (
-      <div className="min-h-96 flex flex-col items-center justify-center px-4">
-        <div className="max-w-md w-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-8 text-center">
-          <AlertTriangle size={48} className="text-amber-600 dark:text-amber-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Unable to load products</h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm">{error}</p>
-          <button
-            onClick={fetchProducts}
-            className="px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg font-semibold hover:opacity-90 transition-opacity"
-          >
+      <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 py-16">
+        <div className="max-w-md w-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-store-lg p-8 text-center">
+          <AlertTriangle size={48} className="text-amber-600 dark:text-amber-400 mx-auto mb-4" aria-hidden />
+          <h3 className="font-display text-xl font-semibold text-[rgb(var(--color-foreground))] mb-2">Unable to load products</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm break-words">{error}</p>
+          <button onClick={fetchProducts} className="btn-store-primary">
             Try again
           </button>
         </div>
@@ -133,36 +131,34 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', ca
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
+    <div className="min-h-screen py-8 md:py-12">
+      <div className="section-store">
+        {/* Breadcrumb & header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
-            <span className="hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer">Home</span>
+            <span className="hover:text-[rgb(var(--color-foreground))] transition-colors cursor-pointer">Home</span>
             <span>/</span>
-            <span className="text-gray-900 dark:text-white font-medium">{getCategoryName()}</span>
+            <span className="text-[rgb(var(--color-foreground))] font-medium">{getCategoryName()}</span>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="font-display text-2xl md:text-3xl font-semibold text-[rgb(var(--color-foreground))] mb-1">
                 {searchQuery ? `Search: "${searchQuery}"` : getCategoryName()}
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
                 {searchQuery
-                  ? `Found ${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''}`
-                  : getCategoryDescription()
-                }
+                  ? `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} found`
+                  : getCategoryDescription()}
               </p>
             </div>
 
-            {/* Sort Dropdown */}
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Sort by:</span>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:border-transparent transition-all text-sm"
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                className="input-store py-2.5 min-h-[44px] w-auto min-w-[160px]"
               >
                 <option value="newest">Newest</option>
                 <option value="price-low">Price: Low to High</option>
@@ -172,42 +168,35 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', ca
             </div>
           </div>
 
-          {/* Results Count */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 flex items-center justify-between border border-gray-200 dark:border-gray-700 shadow-sm">
+          <div className="flex items-center justify-between p-4 rounded-store-lg border border-[var(--border-subtle)] bg-white dark:bg-gray-900/20">
             <div className="flex items-center gap-3">
-              <Filter className="text-gray-500 dark:text-gray-400" size={18} />
-              <span className="text-gray-900 dark:text-white font-semibold">
+              <Filter size={18} className="text-gray-500 dark:text-gray-400" />
+              <span className="font-semibold text-[rgb(var(--color-foreground))]">
                 {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'}
               </span>
             </div>
-            <div className="flex items-center gap-1">
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Grid view">
+            <div className="flex gap-1">
+              <button className="p-2.5 rounded-store hover:bg-black/5 dark:hover:bg-white/5" title="Grid view" aria-label="Grid view">
                 <Grid size={18} className="text-gray-600 dark:text-gray-400" />
               </button>
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" title="List view">
+              <button className="p-2.5 rounded-store hover:bg-black/5 dark:hover:bg-white/5" title="List view" aria-label="List view">
                 <List size={18} className="text-gray-600 dark:text-gray-400" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Products Grid */}
+        {/* Products grid */}
         {filteredProducts.length === 0 ? (
-          <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Package size={48} className="text-gray-400" />
+          <div className="text-center py-20 rounded-store-lg border border-[var(--border-subtle)] bg-white dark:bg-gray-900/20">
+            <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800/50 flex items-center justify-center mx-auto mb-6">
+              <Package size={40} className="text-gray-400" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">No products found</h3>
+            <h3 className="font-display text-2xl font-semibold text-[rgb(var(--color-foreground))] mb-3">No products found</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-              {searchQuery
-                ? 'Try adjusting your search terms or browse all products'
-                : 'Check back soon for new items in this category'
-              }
+              {searchQuery ? 'Try adjusting your search terms or browse all products' : 'Check back soon for new items in this category'}
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-3 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
+            <button onClick={() => window.location.reload()} className="btn-store-primary">
               Browse All Products
             </button>
           </div>
@@ -219,14 +208,14 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({ searchQuery = '', ca
           </div>
         )}
 
-        {/* Bottom Banner */}
+        {/* Bottom CTA */}
         {filteredProducts.length > 0 && (
-          <div className="mt-12 bg-gradient-to-r from-gray-900 to-gray-800 dark:from-gray-950 dark:to-gray-900 rounded-xl p-8 md:p-12 text-center text-white shadow-lg">
-            <h3 className="text-2xl md:text-3xl font-bold mb-3">Love What You See?</h3>
-            <p className="text-lg mb-6 opacity-90 max-w-2xl mx-auto">
+          <div className="mt-16 rounded-store-lg bg-[rgb(var(--color-foreground))] text-[rgb(var(--color-background))] p-8 md:p-12 text-center">
+            <h3 className="font-display text-2xl md:text-3xl font-semibold mb-3">Love what you see?</h3>
+            <p className="text-lg text-white/80 mb-6 max-w-2xl mx-auto">
               Get 15% off your first order when you sign up for our newsletter!
             </p>
-            <button className="bg-white text-gray-900 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
+            <button className="btn-store bg-white text-[rgb(var(--color-foreground))] px-8 py-3 font-semibold hover:bg-white/90">
               Subscribe Now
             </button>
           </div>

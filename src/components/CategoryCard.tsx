@@ -1,4 +1,3 @@
-// src/components/CategoryCard.tsx
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { ProductCategory } from '../Types/categories';
@@ -12,40 +11,38 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onClick })
   return (
     <div
       onClick={onClick}
-      className="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-200 dark:border-gray-700 hover:border-transparent transform hover:-translate-y-2"
+      className="group card-product overflow-hidden cursor-pointer"
     >
-      <div className="relative h-56 overflow-hidden">
+      <div className="relative h-52 overflow-hidden">
         <img
           src={category.image}
           alt={category.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        <div className={`absolute inset-0 bg-gradient-to-t ${category.color} opacity-40 group-hover:opacity-60 transition-opacity`} />
+        <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity`} />
         
-        <div className="absolute top-4 right-4 w-14 h-14 bg-white dark:bg-gray-900 rounded-full flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform">
+        <div className="absolute top-4 right-4 w-12 h-12 rounded-store bg-white/95 dark:bg-gray-900/95 flex items-center justify-center text-2xl shadow-store">
           {category.icon}
         </div>
 
-        <div className="absolute bottom-4 left-4 bg-black/70 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-bold">
+        <span className="absolute bottom-4 left-4 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white text-xs font-semibold">
           {category.itemCount} Items
-        </div>
+        </span>
       </div>
 
-      <div className="p-6">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors">
+      <div className="p-5">
+        <h3 className="font-display text-lg font-semibold text-[rgb(var(--color-foreground))] mb-2 group-hover:text-primary transition-colors">
           {category.name}
         </h3>
         <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
           {category.description}
         </p>
         
-        <button className="flex items-center gap-2 text-red-600 dark:text-red-500 font-bold text-sm group-hover:gap-3 transition-all">
+        <span className="inline-flex items-center gap-2 font-semibold text-primary text-sm group-hover:gap-3 transition-all">
           Shop Now
-          <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-        </button>
+          <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+        </span>
       </div>
-
-      <div className="absolute inset-0 border-2 border-transparent group-hover:border-red-500 rounded-2xl transition-all pointer-events-none" />
     </div>
   );
 };

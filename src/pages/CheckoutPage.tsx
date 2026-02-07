@@ -236,17 +236,17 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
 
   if (cart.length === 0 && !orderComplete) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-16">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="text-center bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-12 border border-gray-200 dark:border-gray-700">
-            <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
-              <ShoppingBag size={48} className="text-gray-400" />
+      <div className="min-h-screen py-16">
+        <div className="section-store max-w-xl mx-auto">
+          <div className="text-center rounded-store-xl shadow-store p-12 border border-[var(--border-subtle)] bg-white dark:bg-gray-900/20">
+            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <ShoppingBag size={40} className="text-gray-400" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Your cart is empty</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg">Add some items to proceed to checkout</p>
+            <h2 className="font-display text-2xl md:text-3xl font-semibold text-[rgb(var(--color-foreground))] mb-3">Your cart is empty</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-8">Add some items to proceed to checkout</p>
             <button
               onClick={() => onNavigate('products')}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 font-semibold transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="btn-store-primary inline-flex items-center gap-2 px-8 py-3.5"
             >
               Continue Shopping
               <ArrowRight size={20} />
@@ -259,11 +259,11 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
 
   if (showProcessing) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center py-16 px-4">
-        <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 md:p-10">
+      <div className="min-h-screen flex items-center justify-center py-16 px-4">
+        <div className="max-w-md w-full rounded-store-xl shadow-store border border-[var(--border-subtle)] bg-white dark:bg-gray-900/20 p-8 md:p-10">
           <div className="flex flex-col items-center text-center">
-            <div className="w-20 h-20 rounded-full border-4 border-red-600 dark:border-red-500 border-t-transparent animate-spin mb-8" />
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            <div className="w-20 h-20 rounded-full border-4 border-primary border-t-transparent animate-spin mb-8" />
+            <h2 className="font-display text-2xl md:text-3xl font-semibold text-[rgb(var(--color-foreground))] mb-2">
               Processing your order
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-8">
@@ -306,11 +306,11 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
             <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle size={48} className="text-green-600 dark:text-green-400" />
             </div>
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">Order Confirmed!</h2>
-            <p className="text-xl text-gray-600 dark:text-gray-400 mb-2">Thank you for your purchase</p>
-            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-6 inline-block">
+            <h2 className="font-display text-3xl md:text-4xl font-semibold text-[rgb(var(--color-foreground))] mb-3">Order Confirmed!</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-2">Thank you for your purchase</p>
+            <div className="bg-gray-100 dark:bg-gray-800/50 rounded-store p-4 mb-6 inline-block">
               <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">Order ID</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{formatOrderId(orderId)}</p>
+              <p className="text-lg font-bold text-[rgb(var(--color-foreground))]">{formatOrderId(orderId)}</p>
             </div>
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 mb-8 text-left border border-blue-200 dark:border-blue-800">
               <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -319,15 +319,15 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
               </h3>
               <ul className="space-y-3 text-gray-700 dark:text-gray-300">
                 <li className="flex items-start gap-3">
-                  <span className="text-blue-600 dark:text-blue-400 font-bold mt-0.5">✓</span>
+                  <span className="text-primary font-bold mt-0.5">✓</span>
                   <span>You will receive an order confirmation email shortly</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-blue-600 dark:text-blue-400 font-bold mt-0.5">✓</span>
+                  <span className="text-primary font-bold mt-0.5">✓</span>
                   <span>Your order will be processed within 1-2 business days</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-blue-600 dark:text-blue-400 font-bold mt-0.5">✓</span>
+                  <span className="text-primary font-bold mt-0.5">✓</span>
                   <span>Shipping typically takes 3-5 business days</span>
                 </li>
               </ul>
@@ -377,7 +377,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Contact Information</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                     Email
                   </label>
                   <input
@@ -387,18 +387,18 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="john.doe@example.com"
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="input-store"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Shipping Address</h2>
+            <div className="rounded-store-lg shadow-store p-6 border border-[var(--border-subtle)] bg-white dark:bg-gray-900/20">
+              <h2 className="font-display text-xl font-semibold text-[rgb(var(--color-foreground))] mb-4">Shipping Address</h2>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                       First Name
                     </label>
                     <input
@@ -408,11 +408,11 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                       value={formData.firstName}
                       onChange={handleInputChange}
                       placeholder="John"
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="input-store"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                       Last Name
                     </label>
                     <input
@@ -422,13 +422,13 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                       value={formData.lastName}
                       onChange={handleInputChange}
                       placeholder="Doe"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="input-store"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                     Address
                   </label>
                   <input
@@ -438,13 +438,13 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                     value={formData.address}
                     onChange={handleInputChange}
                     placeholder="123 Main Street, Apt 4B"
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input-store"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                       City
                     </label>
                     <input
@@ -454,11 +454,11 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                       value={formData.city}
                       onChange={handleInputChange}
                       placeholder="New York"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="input-store"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                       State
                     </label>
                     <input
@@ -468,14 +468,14 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                       value={formData.state}
                       onChange={handleInputChange}
                       placeholder="NY"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="input-store"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                       ZIP Code
                     </label>
                     <input
@@ -486,11 +486,11 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                       onChange={handleInputChange}
                       placeholder="10001"
                       maxLength={10}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="input-store"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                       Country
                     </label>
                     <input
@@ -500,7 +500,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                       value={formData.country}
                       onChange={handleInputChange}
                       placeholder="United States"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="input-store"
                     />
                   </div>
                 </div>
@@ -514,7 +514,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                     Card Number
                   </label>
                   <input
@@ -525,12 +525,12 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                     value={formData.cardNumber}
                     onChange={handleInputChange}
                     maxLength={19}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input-store"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                     Name on Card
                   </label>
                   <input
@@ -540,13 +540,13 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                     value={formData.cardName}
                     onChange={handleInputChange}
                     placeholder="John Doe"
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input-store"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                       Expiry Date
                     </label>
                     <input
@@ -557,11 +557,11 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                       value={formData.expiryDate}
                       onChange={handleInputChange}
                       maxLength={5}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="input-store"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                       CVV
                     </label>
                     <input
@@ -572,14 +572,14 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                       value={formData.cvv}
                       onChange={handleInputChange}
                       maxLength={4}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="input-store"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                <Lock size={16} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <div className="mt-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800/30 p-3 rounded-store border border-[var(--border-subtle)]">
+                <Lock size={16} className="text-primary flex-shrink-0" />
                 <span className="font-medium">Your payment information is encrypted and secure</span>
               </div>
             </div>
@@ -605,8 +605,8 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
         </div>
 
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 sticky top-24 border border-gray-200 dark:border-gray-700">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Order Summary</h2>
+          <div className="rounded-store-lg shadow-store p-6 sticky top-24 border border-[var(--border-subtle)] bg-white dark:bg-gray-900/20">
+            <h2 className="font-display text-xl font-semibold text-[rgb(var(--color-foreground))] mb-4">Order Summary</h2>
             
             <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
               {cart.map((item) => {
@@ -624,7 +624,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                       }}
                     />
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
+                      <p className="text-sm font-medium text-[rgb(var(--color-foreground))] line-clamp-1">
                         {product.name}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Qty: {item.quantity}</p>
@@ -640,11 +640,11 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
             <div className="space-y-3 mb-4">
               <div className="flex justify-between text-gray-600 dark:text-gray-400">
                 <span>Subtotal</span>
-                <span className="font-semibold text-gray-900 dark:text-white">{formatPrice(subtotal)}</span>
+                <span className="font-semibold text-[rgb(var(--color-foreground))]">{formatPrice(subtotal)}</span>
               </div>
               <div className="flex justify-between text-gray-600 dark:text-gray-400">
                 <span>Shipping</span>
-                <span className="font-semibold text-gray-900 dark:text-white">
+                <span className="font-semibold text-[rgb(var(--color-foreground))]">
                   {shipping === 0 ? (
                     <span className="text-green-600 dark:text-green-400">FREE</span>
                   ) : (
@@ -654,23 +654,23 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
               </div>
               <div className="flex justify-between text-gray-600 dark:text-gray-400">
                 <span>Tax</span>
-                <span className="font-semibold text-gray-900 dark:text-white">{formatPrice(tax)}</span>
+                <span className="font-semibold text-[rgb(var(--color-foreground))]">{formatPrice(tax)}</span>
               </div>
             </div>
 
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex justify-between">
-              <span className="text-lg font-bold text-gray-900 dark:text-white">Total</span>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">{formatPrice(total)}</span>
+            <div className="border-t border-[var(--border-subtle)] pt-4 flex justify-between">
+              <span className="font-display text-lg font-semibold text-[rgb(var(--color-foreground))]">Total</span>
+              <span className="text-xl font-bold text-[rgb(var(--color-foreground))]">{formatPrice(total)}</span>
             </div>
 
             {/* Trust Badges */}
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
+            <div className="mt-6 pt-6 border-t border-[var(--border-subtle)] space-y-3">
               <div className="flex items-center gap-3 text-sm">
                 <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center flex-shrink-0">
                   <Shield size={16} className="text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900 dark:text-white">Secure Checkout</p>
+                  <p className="font-semibold text-[rgb(var(--color-foreground))]">Secure Checkout</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">256-bit SSL encryption</p>
                 </div>
               </div>

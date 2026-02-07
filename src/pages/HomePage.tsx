@@ -28,36 +28,56 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   }, [goNext]);
 
   return (
-    <div className="bg-white dark:bg-gray-900">
-      {/* Hero Section */}
-      <section className="relative py-16 md:py-24 px-4 overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="max-w-7xl mx-auto relative z-10">
-          {/* Testimonials Carousel - product photos, auto-slide right to left */}
+    <div className="bg-[rgb(var(--color-background))]">
+      {/* Trust badges - Cartzilla style */}
+      <section className="border-b border-[var(--border-subtle)] bg-gray-50 dark:bg-gray-900/50 py-4">
+        <div className="section-store">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            {[
+              { icon: '🚚', title: 'Free Shipping & Returns', desc: 'For all orders over $50' },
+              { icon: '🔒', title: 'Secure Payment', desc: 'We ensure secure payment' },
+              { icon: '💰', title: 'Money Back Guarantee', desc: 'Returning money 30 days' },
+              { icon: '💬', title: '24/7 Customer Support', desc: 'Friendly customer support' },
+            ].map(({ icon, title, desc }) => (
+              <div key={title} className="flex flex-col items-center">
+                <span className="text-2xl mb-2">{icon}</span>
+                <h3 className="font-semibold text-[rgb(var(--color-foreground))] text-sm">{title}</h3>
+                <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Hero */}
+      <section className="relative py-12 md:py-20 px-4 overflow-hidden">
+        <div className="section-store max-w-store relative z-10">
+          {/* Testimonials carousel */}
           <div className="mb-12 md:mb-16">
-            <h2 className="text-center text-lg font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6">
+            <p className="text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-6">
               What customers received
-            </h2>
+            </p>
             <div className="relative flex items-center justify-center gap-2 md:gap-4">
               <button
                 type="button"
                 onClick={goPrev}
-                aria-label="Previous testimonial"
-                className="absolute left-0 z-20 p-2 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors -translate-x-1 md:translate-x-0"
+                aria-label="Previous"
+                className="absolute left-0 z-20 p-2.5 rounded-full bg-white dark:bg-gray-900/50 shadow-store border border-[var(--border-subtle)] text-[rgb(var(--color-foreground))] hover:bg-black/5 dark:hover:bg-white/5 transition-colors -translate-x-1 md:translate-x-0"
               >
-                <ChevronLeft size={28} />
+                <ChevronLeft size={24} />
               </button>
-              <div className="overflow-hidden w-full max-w-2xl mx-2 md:mx-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl bg-white dark:bg-gray-800">
+              <div className="overflow-hidden w-full max-w-2xl mx-2 md:mx-4 rounded-store-lg border border-[var(--border-subtle)] shadow-store bg-white dark:bg-gray-900/30">
                 <div
                   className="flex transition-transform duration-500 ease-out"
                   style={{ transform: `translateX(-${testimonialIndex * 100}%)` }}
                 >
                   {testimonialsData.map((item) => (
-                    <div key={item.id} className="w-full flex-shrink-0 flex flex-col items-center p-4 md:p-6">
-                      <div className="w-full aspect-square max-h-64 md:max-h-80 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700">
+                    <div key={item.id} className="w-full flex-shrink-0 flex flex-col items-center p-6 md:p-8">
+                      <div className="w-full aspect-square max-h-56 md:max-h-72 rounded-store overflow-hidden bg-gray-100 dark:bg-gray-800/50">
                         <img src={item.imageUrl} alt={item.productName} className="w-full h-full object-cover" />
                       </div>
-                      <p className="mt-3 font-semibold text-gray-900 dark:text-white">{item.productName}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 italic">&ldquo;{item.quote}&rdquo;</p>
+                      <p className="mt-4 font-semibold text-[rgb(var(--color-foreground))]">{item.productName}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 italic mt-1">&ldquo;{item.quote}&rdquo;</p>
                     </div>
                   ))}
                 </div>
@@ -65,10 +85,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               <button
                 type="button"
                 onClick={goNext}
-                aria-label="Next testimonial"
-                className="absolute right-0 z-20 p-2 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors translate-x-1 md:translate-x-0"
+                aria-label="Next"
+                className="absolute right-0 z-20 p-2.5 rounded-full bg-white dark:bg-gray-900/50 shadow-store border border-[var(--border-subtle)] text-[rgb(var(--color-foreground))] hover:bg-black/5 dark:hover:bg-white/5 transition-colors translate-x-1 md:translate-x-0"
               >
-                <ChevronRight size={28} />
+                <ChevronRight size={24} />
               </button>
             </div>
             <div className="flex justify-center gap-1.5 mt-4">
@@ -77,9 +97,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   key={i}
                   type="button"
                   onClick={() => setTestimonialIndex(i)}
-                  aria-label={`Go to testimonial ${i + 1}`}
-                  className={`h-2 rounded-full transition-all ${
-                    i === testimonialIndex ? 'w-6 bg-red-600 dark:bg-red-500' : 'w-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                  aria-label={`Go to slide ${i + 1}`}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === testimonialIndex ? 'w-6 bg-primary' : 'w-1.5 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
                   }`}
                 />
               ))}
@@ -87,33 +107,31 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           </div>
 
           <div className="text-center mb-12">
-            <div className="inline-block mb-6">
-              <span className="bg-red-600 text-white px-4 py-1.5 rounded-full font-semibold text-xs uppercase tracking-wide shadow-lg">
-                {t('freeShipping')}
-              </span>
-            </div>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wide mb-6">
+              {t('freeShipping')}
+            </span>
             
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 tracking-tight leading-tight">
+            <h1 className="font-display text-store-hero font-semibold text-[rgb(var(--color-foreground))] mb-6 leading-tight">
               {t('heroTitle1')}<br />
-              <span className="text-red-600 dark:text-red-500">{t('heroTitle2')}</span>
+              <span className="text-primary">{t('heroTitle2')}</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto font-medium">
+            <p className="text-store-subtitle text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
               {t('heroSubtitle')}
-              <span className="font-semibold text-gray-900 dark:text-white"> {t('heroSubtitle2')}</span>
+              <span className="font-semibold text-[rgb(var(--color-foreground))]"> {t('heroSubtitle2')}</span>
             </p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4 mb-10">
               <button
                 onClick={() => onNavigate('products')}
-                className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-3.5 rounded-lg text-base font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                className="btn-store-primary px-8 py-3.5 flex items-center justify-center gap-2"
               >
                 {t('shopNow')}
                 <ArrowRight size={18} />
               </button>
               <button
                 onClick={() => onNavigate('gift-cards')}
-                className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-gray-300 dark:border-gray-600 px-8 py-3.5 rounded-lg text-base font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow-md"
+                className="btn-store-secondary px-8 py-3.5 flex items-center justify-center gap-2"
               >
                 {t('giftCards')}
               </button>
@@ -121,177 +139,152 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
             <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-600 dark:text-gray-400">
               <div className="flex items-center gap-2">
-                <Star className="text-yellow-500" size={18} fill="currentColor" />
-                <span className="font-semibold">{t('fiveStarReviews')}</span>
+                <Star className="text-amber-500" size={18} fill="currentColor" />
+                <span className="font-medium">{t('fiveStarReviews')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Award className="text-blue-600 dark:text-blue-400" size={18} />
-                <span className="font-semibold">{t('premiumQuality')}</span>
+                <Award className="text-gray-600 dark:text-gray-400" size={18} />
+                <span className="font-medium">{t('premiumQuality')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Zap className="text-green-600 dark:text-green-400" size={18} />
-                <span className="font-semibold">{t('fastShipping')}</span>
+                <Zap className="text-emerald-600 dark:text-emerald-400" size={18} />
+                <span className="font-medium">{t('fastShipping')}</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Banner */}
-      <section className="bg-gray-900 dark:bg-gray-950 text-white py-12 border-y border-gray-800 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div className="flex flex-col items-center">
-              <div className="bg-red-600 rounded-xl p-4 mb-4 shadow-lg">
-                <ShoppingBag size={28} />
+      {/* Features banner */}
+      <section className="bg-[rgb(var(--color-foreground))] text-[rgb(var(--color-background))] py-14 border-y border-white/10">
+        <div className="section-store">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
+            {[
+              { icon: ShoppingBag, title: t('thousandsOfDesigns'), desc: t('thousandsOfDesignsDesc') },
+              { icon: Sparkles, title: t('customOrders'), desc: t('customOrdersDesc') },
+              { icon: TrendingUp, title: t('fastTurnaround'), desc: t('fastTurnaroundDesc') },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex flex-col items-center">
+                <div className="w-14 h-14 rounded-store-lg bg-primary/20 flex items-center justify-center mb-4">
+                  <Icon size={26} className="text-primary" />
+                </div>
+                <h3 className="font-display text-lg font-semibold mb-2">{title}</h3>
+                <p className="text-white/70 text-sm">{desc}</p>
               </div>
-              <h3 className="text-lg font-bold mb-2">{t('thousandsOfDesigns')}</h3>
-              <p className="text-gray-400 text-sm">{t('thousandsOfDesignsDesc')}</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="bg-red-600 rounded-xl p-4 mb-4 shadow-lg">
-                <Sparkles size={28} />
-              </div>
-              <h3 className="text-lg font-bold mb-2">{t('customOrders')}</h3>
-              <p className="text-gray-400 text-sm">{t('customOrdersDesc')}</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="bg-red-600 rounded-xl p-4 mb-4 shadow-lg">
-                <TrendingUp size={28} />
-              </div>
-              <h3 className="text-lg font-bold mb-2">{t('fastTurnaround')}</h3>
-              <p className="text-gray-400 text-sm">{t('fastTurnaroundDesc')}</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Product Categories */}
-      <section className="py-16 md:py-20 px-4 bg-gray-50 dark:bg-gray-900/50">
-        <div className="max-w-7xl mx-auto">
+      {/* Categories */}
+      <section className="py-16 md:py-20">
+        <div className="section-store">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
+            <h2 className="font-display text-2xl md:text-3xl font-semibold text-[rgb(var(--color-foreground))] mb-3">
               {t('shopByCategory')}
             </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              {t('findWhatYouLooking')}
-            </p>
+            <p className="text-gray-600 dark:text-gray-400">{t('findWhatYouLooking')}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <div 
+            <div
               onClick={() => onNavigate('products')}
-              className="group relative bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all transform hover:-translate-y-1 border border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer"
+              className="group relative card-product p-6 cursor-pointer"
             >
-              <div className="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 font-semibold text-xs rounded-lg shadow-lg z-10">
+              <span className="absolute top-4 right-4 px-3 py-1 rounded-full bg-primary text-white text-xs font-semibold">
                 Hot
+              </span>
+              <div className="w-14 h-14 rounded-store-lg bg-gray-200 dark:bg-gray-700/50 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <ShoppingBag size={28} className="text-[rgb(var(--color-foreground))]" />
               </div>
-              <div className="p-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <ShoppingBag className="text-white" size={32} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  {t('premiumMerchandise')}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm line-clamp-2">
-                  {t('merchandiseDesc')}
-                </p>
-                <button className="text-red-600 dark:text-red-500 font-semibold text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
-                  {t('shopNow')}
-                  <ArrowRight size={16} />
-                </button>
-              </div>
+              <h3 className="font-display text-xl font-semibold text-[rgb(var(--color-foreground))] mb-2">
+                {t('premiumMerchandise')}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">{t('merchandiseDesc')}</p>
+              <span className="inline-flex items-center gap-2 font-semibold text-primary text-sm group-hover:gap-3 transition-all">
+                {t('shopNow')}
+                <ArrowRight size={16} />
+              </span>
             </div>
 
-            <div 
+            <div
               onClick={() => onNavigate('gift-cards')}
-              className="group relative bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all transform hover:-translate-y-1 border border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer"
+              className="group relative card-product p-6 cursor-pointer"
             >
-              <div className="absolute top-3 right-3 bg-green-600 text-white px-3 py-1 font-semibold text-xs rounded-lg shadow-lg z-10">
+              <span className="absolute top-4 right-4 px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-semibold">
                 Popular
+              </span>
+              <div className="w-14 h-14 rounded-store-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <Gift size={28} className="text-emerald-600 dark:text-emerald-400" />
               </div>
-              <div className="p-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Gift className="text-white" size={32} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  {t('giftCards')}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm line-clamp-2">
-                  {t('merchandiseDesc')}
-                </p>
-                <button className="text-green-600 dark:text-green-500 font-semibold text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
-                  {t('buyNow')}
-                  <ArrowRight size={16} />
-                </button>
-              </div>
+              <h3 className="font-display text-xl font-semibold text-[rgb(var(--color-foreground))] mb-2">
+                {t('giftCards')}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">{t('merchandiseDesc')}</p>
+              <span className="inline-flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400 text-sm group-hover:gap-3 transition-all">
+                {t('buyNow')}
+                <ArrowRight size={16} />
+              </span>
             </div>
 
-            <div 
+            <div
               onClick={() => onNavigate('deals')}
-              className="group relative bg-gradient-to-br from-red-600 to-orange-600 rounded-xl shadow-sm hover:shadow-lg transition-all transform hover:-translate-y-1 border border-red-700 overflow-hidden cursor-pointer"
+              className="group relative p-6 rounded-store-lg overflow-hidden bg-gradient-to-br from-primary to-primary-dark cursor-pointer shadow-store-product hover:shadow-store-product-hover transition-all"
             >
-              <div className="absolute top-3 right-3 bg-yellow-400 text-gray-900 px-3 py-1 font-semibold text-xs rounded-lg shadow-lg z-10">
+              <span className="absolute top-4 right-4 px-3 py-1 rounded-full bg-white/90 text-primary text-xs font-semibold">
                 Sale
+              </span>
+              <div className="w-14 h-14 rounded-store-lg bg-white/20 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <Sparkles size={28} className="text-white" />
               </div>
-              <div className="p-6">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Sparkles className="text-white" size={32} />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">
-                  {t('exclusiveDeals')}
-                </h3>
-                <p className="text-white/90 mb-4 text-sm line-clamp-2">
-                  {t('dealsDesc')}
-                </p>
-                <button className="text-white font-semibold text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
-                  {t('viewDeals')}
-                  <ArrowRight size={16} />
-                </button>
-              </div>
+              <h3 className="font-display text-xl font-semibold text-white mb-2">{t('exclusiveDeals')}</h3>
+              <p className="text-white/90 text-sm mb-4 line-clamp-2">{t('dealsDesc')}</p>
+              <span className="inline-flex items-center gap-2 font-semibold text-white text-sm group-hover:gap-3 transition-all">
+                {t('viewDeals')}
+                <ArrowRight size={16} />
+              </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 text-white py-16 md:py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+      {/* CTA */}
+      <section className="bg-[rgb(var(--color-foreground))] text-[rgb(var(--color-background))] py-16 md:py-20">
+        <div className="section-store text-center max-w-3xl mx-auto">
+          <h2 className="font-display text-2xl md:text-3xl font-semibold mb-4">
             {t('joinCommunity')}
           </h2>
-          <p className="text-lg md:text-xl mb-8 opacity-90">
-            {t('joinDesc')} <span className="font-bold text-yellow-400">50% OFF!</span>
+          <p className="text-lg md:text-xl text-white/80 mb-8">
+            {t('joinDesc')} <span className="font-bold text-primary">50% OFF!</span>
           </p>
-          <button 
+          <button
             onClick={() => onNavigate('products')}
-            className="bg-white text-gray-900 px-8 py-3.5 rounded-lg text-base font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+            className="btn-store bg-white text-[rgb(var(--color-foreground))] px-8 py-3.5 font-semibold hover:bg-white/90"
           >
             {t('getStartedFree')}
           </button>
         </div>
       </section>
 
-      {/* Why Choose Us */}
-      <section className="py-16 md:py-20 px-4 bg-white dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto">
+      {/* Why choose us */}
+      <section className="py-16 md:py-20">
+        <div className="section-store">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
+            <h2 className="font-display text-2xl md:text-3xl font-semibold text-[rgb(var(--color-foreground))]">
               {t('whyChooseUs')}
             </h2>
           </div>
-
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: '🎨', title: t('customDesigns'), desc: t('customDesignsDesc') },
-              { icon: '⚡', title: t('fastShipping'), desc: t('fastShippingDesc') },
-              { icon: '💯', title: t('qualityGuaranteed'), desc: t('qualityDesc') },
-              { icon: '💬', title: t('support247'), desc: t('supportDesc') }
-            ].map((item, index) => (
-              <div key={index} className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 text-center hover:shadow-lg transition-all">
-                <div className="text-4xl mb-3">{item.icon}</div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{item.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">{item.desc}</p>
+              { icon: 'custom', title: t('customDesigns'), desc: t('customDesignsDesc') },
+              { icon: 'ship', title: t('fastShipping'), desc: t('fastShippingDesc') },
+              { icon: 'quality', title: t('qualityGuaranteed'), desc: t('qualityDesc') },
+              { icon: 'support', title: t('support247'), desc: t('supportDesc') },
+            ].map(({ icon, title, desc }) => (
+              <div key={title} className="p-6 rounded-store-lg border border-[var(--border-subtle)] bg-white dark:bg-gray-900/20 text-center hover:shadow-store transition-shadow">
+                <div className="text-3xl mb-3">{icon === 'custom' ? '🎨' : icon === 'ship' ? '⚡' : icon === 'quality' ? '💯' : '💬'}</div>
+                <h3 className="font-display text-lg font-semibold text-[rgb(var(--color-foreground))] mb-2">{title}</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">{desc}</p>
               </div>
             ))}
           </div>

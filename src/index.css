@@ -1,106 +1,141 @@
-/* IMPORTANT: @import MUST come first! */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
+/* HTS Swag - Cartzilla-inspired Premium E-Commerce Design System */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --color-foreground: 24 29 37;
+  --color-background: 255 255 255;
+  --color-accent: 245 82 102;
+  --color-accent-hover: 232 74 92;
+  --page-width: 1320px;
+  --border-subtle: #e0e5eb;
+  --border-strong: #cad0d9;
+  --text-muted: #6c727f;
+  --text-body: #4e5562;
+}
+
+html.dark {
+  --color-foreground: 238 241 246;
+  --color-background: 24 29 37;
+  --color-accent: 245 82 102;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --text-muted: #9ca3af;
+  --text-body: #cad0d9;
+}
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.01em;
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: 0.01em;
+    color: rgb(var(--color-foreground));
+    background-color: rgb(var(--color-background));
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: rgb(var(--color-foreground));
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+@layer components {
+  .btn-store {
+    @apply inline-flex items-center justify-center px-5 py-2.5 font-semibold rounded-store text-sm transition-all duration-200;
+  }
+
+  .btn-store-primary {
+    @apply btn-store bg-primary text-white hover:bg-primary-hover active:scale-[0.98] shadow-store-sm;
+  }
+
+  .btn-store-secondary {
+    @apply btn-store border-2 border-[var(--border-strong)] bg-transparent text-[rgb(var(--color-foreground))] hover:bg-gray-50 dark:hover:bg-gray-800;
+  }
+
+  .btn-store-accent {
+    @apply btn-store bg-primary text-white hover:bg-primary-hover active:scale-[0.98] shadow-store-sm;
+  }
+
+  .input-store {
+    @apply w-full px-4 py-2.5 rounded-store border border-[var(--border-subtle)] bg-white dark:bg-gray-900 text-[rgb(var(--color-foreground))] placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-all;
+  }
+
+  .card-product {
+    @apply bg-white dark:bg-gray-900 rounded-store-lg overflow-hidden border border-[var(--border-subtle)] shadow-store transition-all duration-300 hover:shadow-store-product-hover hover:border-gray-300 dark:hover:border-gray-700;
+  }
+
+  .section-store {
+    @apply max-w-store mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .badge-sale {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-primary text-white;
+  }
+
+  .badge-new {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-success text-white;
+  }
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-html.dark {
-  color-scheme: dark;
-}
-
-/* Smooth transitions for interactive elements */
 button, a, input, select, textarea {
-  transition: all 0.2s ease-in-out;
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
 }
 
-/* Modern Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: rgb(243 244 246);
-}
-
-html.dark ::-webkit-scrollbar-track {
-  background-color: rgb(31 41 55);
+  background: rgb(var(--color-background));
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgb(156 163 175);
+  background: rgb(var(--color-foreground) / 0.12);
   border-radius: 4px;
 }
 
-html.dark ::-webkit-scrollbar-thumb {
-  background-color: rgb(75 85 99);
-}
-
 ::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(107 114 128);
+  background: rgb(var(--color-foreground) / 0.2);
 }
 
-/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
+  from { transform: translateY(10px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes slideDown {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-@keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-in;
+  animation: fadeIn 0.35s ease-out;
 }
 
 .animate-slide-up {
-  animation: slideUp 0.3s ease-out;
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.animate-slide-down {
-  animation: slideDown 0.3s ease-out;
-}
-
-.animate-pulse-slow {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Text utilities */
 .line-clamp-1 {
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -122,312 +157,23 @@ html.dark ::-webkit-scrollbar-thumb {
   overflow: hidden;
 }
 
-/* Focus styles */
 *:focus-visible {
-  outline: 2px solid rgb(239 68 68);
+  outline: 2px solid rgb(var(--color-accent));
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
-/* Modern input styles */
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-  ring: 2px solid rgb(239 68 68);
-  border-color: transparent;
-}
-
-/* Loading skeleton */
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgb(229 231 235) 0%,
-    rgb(243 244 246) 50%,
-    rgb(229 231 235) 100%
+    rgb(var(--color-foreground) / 0.06) 0%,
+    rgb(var(--color-foreground) / 0.1) 50%,
+    rgb(var(--color-foreground) / 0.06) 100%
   );
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite linear;
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }
 
-html.dark .skeleton {
-  background: linear-gradient(
-    90deg,
-    rgb(55 65 81) 0%,
-    rgb(75 85 99) 50%,
-    rgb(55 65 81) 100%
-  );
-  background-size: 1000px 100%;
-}
-
-/* Modern card shadows - Shopify style */
-.card-shadow {
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-}
-
-.card-shadow-hover {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  transform: translateY(-2px);
-}
-
-.card-shadow-lg {
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-}
-
-/* Professional product card shadow */
-.product-card-shadow {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.product-card-shadow:hover {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 4px 10px -2px rgba(0, 0, 0, 0.1);
-  transform: translateY(-4px);
-}
-
-/* Badge styles */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.badge-success {
-  background-color: rgb(220 252 231);
-  color: rgb(22 163 74);
-}
-
-html.dark .badge-success {
-  background-color: rgb(20 83 45);
-  color: rgb(134 239 172);
-}
-
-.badge-warning {
-  background-color: rgb(254 249 195);
-  color: rgb(234 179 8);
-}
-
-html.dark .badge-warning {
-  background-color: rgb(113 63 18);
-  color: rgb(253 224 71);
-}
-
-.badge-error {
-  background-color: rgb(254 226 226);
-  color: rgb(239 68 68);
-}
-
-html.dark .badge-error {
-  background-color: rgb(127 29 29);
-  color: rgb(252 165 165);
-}
-
-.badge-info {
-  background-color: rgb(219 234 254);
-  color: rgb(59 130 246);
-}
-
-html.dark .badge-info {
-  background-color: rgb(30 58 138);
-  color: rgb(147 197 253);
-}
-
-/* Notification styles */
-.notification {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 50;
-  background-color: white;
-  border-radius: 0.75rem;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-  padding: 1rem;
-  min-width: 300px;
-  animation: slideDown 0.3s ease-out;
-}
-
-html.dark .notification {
-  background-color: rgb(31 41 55);
-}
-
-/* Glass morphism effect */
-.glass {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-html.dark .glass {
-  background: rgba(31, 41, 55, 0.8);
-}
-
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(to right, rgb(239 68 68), rgb(249 115 22));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Screen reader only */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-/* Print styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-}
-
-/* Mobile optimizations */
-@media (max-width: 768px) {
-  .hide-on-mobile {
-    display: none;
-  }
-}
-
-@media (min-width: 769px) {
-  .hide-on-desktop {
-    display: none;
-  }
-}
-
-/* Improved button styles */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 1.5rem;
-  font-weight: 700;
-  border-radius: 0.75rem;
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: rgb(239 68 68);
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: rgb(220 38 38);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-}
-
-.btn-secondary {
-  background: rgb(243 244 246);
-  color: rgb(17 24 39);
-}
-
-html.dark .btn-secondary {
-  background: rgb(55 65 81);
-  color: white;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: rgb(229 231 235);
-}
-
-html.dark .btn-secondary:hover:not(:disabled) {
-  background: rgb(75 85 99);
-}
-
-/* Image loading placeholder */
-img[src=""], img:not([src]) {
-  background: linear-gradient(
-    90deg,
-    rgb(229 231 235) 0%,
-    rgb(243 244 246) 50%,
-    rgb(229 231 235) 100%
-  );
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite linear;
-}
-
-/* Professional button styles */
-.btn-shopify {
-  background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
-  color: white;
-  font-weight: 600;
-  padding: 0.875rem 1.75rem;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.btn-shopify:hover {
-  background: linear-gradient(180deg, #4338ca 0%, #3730a3 100%);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transform: translateY(-1px);
-}
-
-.btn-shopify:active {
-  transform: translateY(0);
-}
-
-/* Trust badge styles */
-.trust-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #1f2937;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-}
-
-html.dark .trust-badge {
-  background: rgba(31, 41, 55, 0.9);
-  color: white;
-}
-
-/* Professional input styles */
-.input-shopify {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-  background: white;
-  color: #1f2937;
-}
-
-.input-shopify:focus {
-  outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-}
-
-html.dark .input-shopify {
-  background: #1f2937;
-  border-color: #4b5563;
-  color: white;
-}
-
-html.dark .input-shopify:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

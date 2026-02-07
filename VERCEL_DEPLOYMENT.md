@@ -48,12 +48,26 @@ git push -u origin main
 4. **Add Environment Variables**
    Click on "Environment Variables" and add:
 
+   **Required (client + server):**
    ```
    VITE_SUPABASE_URL = your_supabase_project_url
    VITE_SUPABASE_ANON_KEY = your_supabase_anon_key
-   VITE_TELEGRAM_BOT_TOKEN = your_telegram_bot_token (optional)
-   VITE_TELEGRAM_CHAT_ID = your_telegram_chat_id (optional)
    ```
+
+   **Required for OTP verification (server-side only):**
+   ```
+   RESEND_API_KEY = your_resend_api_key
+   SUPABASE_SERVICE_ROLE_KEY = your_supabase_service_role_key
+   SUPABASE_URL = your_supabase_project_url
+   ```
+
+   **Optional:**
+   ```
+   VITE_TELEGRAM_BOT_TOKEN = your_telegram_bot_token
+   VITE_TELEGRAM_CHAT_ID = your_telegram_chat_id
+   ```
+
+   > **Note:** `RESEND_API_KEY` is from [resend.com](https://resend.com). Domain `htswag.net` must be verified in Resend. `SUPABASE_SERVICE_ROLE_KEY` is from Supabase Dashboard → Settings → API → service_role (never expose to client).
 
 5. **Deploy**
    - Click "Deploy"
@@ -85,6 +99,13 @@ vercel env add VITE_SUPABASE_URL
 # Add Supabase Anon Key
 vercel env add VITE_SUPABASE_ANON_KEY
 
+# Add OTP / Email (Resend)
+vercel env add RESEND_API_KEY
+
+# Add Supabase Service Role (for OTP storage)
+vercel env add SUPABASE_SERVICE_ROLE_KEY
+vercel env add SUPABASE_URL
+
 # Add Telegram Bot Token (optional)
 vercel env add VITE_TELEGRAM_BOT_TOKEN
 
@@ -104,8 +125,16 @@ For each command, you'll be prompted to:
 2. Select your project
 3. Go to **Settings** → **API**
 4. Copy:
-   - **Project URL** → Use for `VITE_SUPABASE_URL`
+   - **Project URL** → Use for `VITE_SUPABASE_URL` and `SUPABASE_URL`
    - **anon/public key** → Use for `VITE_SUPABASE_ANON_KEY`
+   - **service_role key** → Use for `SUPABASE_SERVICE_ROLE_KEY` (server-side only, never expose to client)
+
+### Resend (OTP Emails)
+
+1. Sign up at [resend.com](https://resend.com)
+2. Get your API key from the dashboard
+3. Verify your domain (e.g. `htswag.net`) in Resend
+4. Add `RESEND_API_KEY` in Vercel
 
 ### Telegram Credentials (Optional)
 

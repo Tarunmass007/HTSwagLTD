@@ -1,11 +1,9 @@
-// src/components/Header.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { Search, ShoppingCart, User, ChevronDown, Moon, Sun, Menu, X, Home, Package, Gift, Flame, Grid } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeProvider';
 import { useCurrencyLanguage, languages, currencies } from '../context/CurrencyLanguageContext';
-import { supabase } from '../lib/supabase';
+import { LoginPage } from '../pages/LoginPage';
 
 interface HeaderProps {
   onNavigate: (page: string, category?: string) => void;
@@ -23,10 +21,6 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [authMessage, setAuthMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const userMenuRef = useRef<HTMLDivElement>(null);
   const langMenuRef = useRef<HTMLDivElement>(null);
@@ -34,61 +28,16 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setShowUserMenu(false);
-      }
-      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
-        setShowLanguageMenu(false);
-      }
-      if (currMenuRef.current && !currMenuRef.current.contains(event.target as Node)) {
-        setShowCurrencyMenu(false);
-      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) setShowUserMenu(false);
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) setShowLanguageMenu(false);
+      if (currMenuRef.current && !currMenuRef.current.contains(event.target as Node)) setShowCurrencyMenu(false);
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setAuthMessage(null);
-
-    try {
-      if (authMode === 'signup') {
-        const { data, error } = await supabase.auth.signUp(
-          { email, password },
-          { emailRedirectTo: `${window.location.origin}/` }
-        );
-        if (error) throw error;
-        setAuthMessage({
-          type: 'success',
-          text: data?.user && !data?.session
-            ? 'Account created! Please check your email to confirm your account, then sign in.'
-            : 'Account created! You can sign in now.',
-        });
-        setPassword('');
-        if (data?.session) {
-          setShowAuthModal(false);
-          setEmail('');
-        }
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        setShowAuthModal(false);
-        setEmail('');
-        setPassword('');
-        setAuthMessage(null);
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Something went wrong';
-      setAuthMessage({ type: 'error', text: message });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleLogout = async () => {
+    const { supabase } = await import('../lib/supabase');
     await supabase.auth.signOut();
     setShowUserMenu(false);
   };
@@ -98,39 +47,39 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
     onSearch(searchQuery);
   };
 
+  const openAuth = (mode: 'login' | 'signup') => {
+    setAuthMode(mode);
+    setShowAuthModal(true);
+    setShowUserMenu(false);
+  };
+
   return (
     <>
-      {/* Top Bar - Black with white text */}
-      <div className="bg-black text-white py-2 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between text-xs md:text-sm">
-          <div className="flex items-center gap-4">
-            <span className="hidden md:inline">📧 support@htswag.com</span>
-            <span className="hidden md:inline">📞 1-800-921-0183</span>
+      {/* Announcement bar */}
+      <div className="bg-[rgb(var(--color-foreground))] text-[rgb(var(--color-background))] py-2.5 px-4">
+        <div className="section-store flex items-center justify-between text-xs md:text-sm">
+          <div className="flex items-center gap-6">
+            <span className="hidden md:inline opacity-90">Free shipping on orders over $50</span>
+            <span className="hidden md:inline opacity-75">support@htswag.com</span>
           </div>
           <div className="flex items-center gap-4">
             <div className="relative" ref={langMenuRef}>
               <button
-                onClick={() => {
-                  setShowLanguageMenu(!showLanguageMenu);
-                  setShowCurrencyMenu(false);
-                }}
-                className="flex items-center gap-1 hover:text-gray-300 transition-colors"
+                onClick={() => { setShowLanguageMenu(!showLanguageMenu); setShowCurrencyMenu(false); }}
+                className="flex items-center gap-1.5 opacity-90 hover:opacity-100 transition-opacity"
               >
                 <span>{language.flag}</span>
                 <span className="hidden sm:inline">{language.code.toUpperCase()}</span>
                 <ChevronDown size={14} />
               </button>
               {showLanguageMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl py-2 z-50">
+                <div className="absolute right-0 mt-2 w-48 bg-[rgb(var(--color-background))] border border-[var(--border-subtle)] rounded-store shadow-store-lg py-2 z-50">
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
-                      onClick={() => {
-                        setLanguage(lang);
-                        setShowLanguageMenu(false);
-                      }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 ${
-                        language.code === lang.code ? 'bg-gray-100 dark:bg-gray-700 text-black dark:text-white font-medium' : 'text-gray-700 dark:text-gray-300'
+                      onClick={() => { setLanguage(lang); setShowLanguageMenu(false); }}
+                      className={`w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 hover:bg-black/5 dark:hover:bg-white/5 ${
+                        language.code === lang.code ? 'font-semibold' : 'text-gray-600 dark:text-gray-400'
                       }`}
                     >
                       <span>{lang.flag}</span>
@@ -140,33 +89,26 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
                 </div>
               )}
             </div>
-
             <div className="relative" ref={currMenuRef}>
               <button
-                onClick={() => {
-                  setShowCurrencyMenu(!showCurrencyMenu);
-                  setShowLanguageMenu(false);
-                }}
-                className="flex items-center gap-1 hover:text-gray-300 transition-colors"
+                onClick={() => { setShowCurrencyMenu(!showCurrencyMenu); setShowLanguageMenu(false); }}
+                className="flex items-center gap-1.5 opacity-90 hover:opacity-100 transition-opacity"
               >
                 <span>{currency.symbol}</span>
                 <span className="hidden sm:inline">{currency.code}</span>
                 <ChevronDown size={14} />
               </button>
               {showCurrencyMenu && (
-                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl py-2 z-50">
+                <div className="absolute right-0 mt-2 w-56 bg-[rgb(var(--color-background))] border border-[var(--border-subtle)] rounded-store shadow-store-lg py-2 z-50">
                   {currencies.map((curr) => (
                     <button
                       key={curr.code}
-                      onClick={() => {
-                        setCurrency(curr);
-                        setShowCurrencyMenu(false);
-                      }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        currency.code === curr.code ? 'bg-gray-100 dark:bg-gray-700 text-black dark:text-white font-medium' : 'text-gray-700 dark:text-gray-300'
+                      onClick={() => { setCurrency(curr); setShowCurrencyMenu(false); }}
+                      className={`w-full px-4 py-2.5 text-left text-sm hover:bg-black/5 dark:hover:bg-white/5 ${
+                        currency.code === curr.code ? 'font-semibold' : 'text-gray-600 dark:text-gray-400'
                       }`}
                     >
-                      {curr.code} ({curr.symbol}) - {curr.name}
+                      {curr.code} ({curr.symbol}) — {curr.name}
                     </button>
                   ))}
                 </div>
@@ -176,52 +118,46 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
         </div>
       </div>
 
-      {/* Main Header - Light background */}
-      <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-40 border-b border-gray-200 dark:border-gray-700 backdrop-blur-sm bg-white/95 dark:bg-gray-900/95">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+      {/* Main header */}
+      <header className="sticky top-0 z-40 bg-[rgb(var(--color-background))]/95 backdrop-blur-md border-b border-[var(--border-subtle)]">
+        <div className="section-store py-4">
           <div className="flex items-center justify-between gap-4">
-            {/* Mobile Menu Button */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="lg:hidden p-2 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className="lg:hidden p-2 rounded-store text-[rgb(var(--color-foreground))] hover:bg-black/5 dark:hover:bg-white/5"
             >
-              {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
+              {showMobileMenu ? <X size={22} /> : <Menu size={22} />}
             </button>
 
-            {/* Logo */}
-            <div className="flex-shrink-0 cursor-pointer group" onClick={() => onNavigate('home')}>
-              <h1
-                className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white hover:text-red-600 dark:hover:text-red-500 transition-colors tracking-tight"
-              >
-                HTS <span className="text-red-600 dark:text-red-500">SWAG</span>
+            <button
+              onClick={() => onNavigate('home')}
+              className="flex-shrink-0 text-left"
+            >
+              <h1 className="font-display text-xl md:text-2xl font-bold text-[rgb(var(--color-foreground))] tracking-tight">
+                HTS <span className="text-primary">SWAG</span>
               </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Premium Merchandise & Gift Cards</p>
-            </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium hidden sm:block">Premium Merchandise & Gift Cards</p>
+            </button>
 
-            {/* Search Bar - Desktop */}
-            <div className="hidden lg:block flex-1 max-w-xl mx-4">
-              <form onSubmit={handleSearch} className="relative">
+            {/* Search */}
+            <form onSubmit={handleSearch} className="hidden lg:block flex-1 max-w-md mx-6">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input
                   type="text"
-                  placeholder="Search for products..."
+                  placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-4 pr-12 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-800 text-black dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:border-transparent transition-all text-sm"
+                  className="input-store pl-11 py-2.5 text-sm"
                 />
-                <button 
-                  type="submit"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  <Search size={18} />
-                </button>
-              </form>
-            </div>
+              </div>
+            </form>
 
-            {/* Right Side Icons */}
+            {/* Actions */}
             <div className="flex items-center gap-1">
               <button
                 onClick={toggleTheme}
-                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                className="p-2.5 rounded-store text-gray-600 dark:text-gray-400 hover:text-[rgb(var(--color-foreground))] hover:bg-black/5 dark:hover:bg-white/5"
                 title="Toggle theme"
               >
                 {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
@@ -230,39 +166,25 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  className="p-2.5 rounded-store text-gray-600 dark:text-gray-400 hover:text-[rgb(var(--color-foreground))] hover:bg-black/5 dark:hover:bg-white/5"
                 >
                   <User size={20} />
                 </button>
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl py-1 z-50">
+                  <div className="absolute right-0 mt-2 w-52 bg-[rgb(var(--color-background))] border border-[var(--border-subtle)] rounded-store shadow-store-lg py-2 z-50">
                     {isAuthenticated ? (
                       <button
                         onClick={handleLogout}
-                        className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="w-full px-4 py-2.5 text-left text-sm font-medium hover:bg-black/5 dark:hover:bg-white/5"
                       >
-                        Log out
+                        Sign out
                       </button>
                     ) : (
                       <>
-                        <button
-                          onClick={() => {
-                            setAuthMode('login');
-                            setShowAuthModal(true);
-                            setShowUserMenu(false);
-                          }}
-                          className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        >
-                          Log in
+                        <button onClick={() => openAuth('login')} className="w-full px-4 py-2.5 text-left text-sm font-medium hover:bg-black/5 dark:hover:bg-white/5">
+                          Sign in
                         </button>
-                        <button
-                          onClick={() => {
-                            setAuthMode('signup');
-                            setShowAuthModal(true);
-                            setShowUserMenu(false);
-                          }}
-                          className="w-full px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        >
+                        <button onClick={() => openAuth('signup')} className="w-full px-4 py-2.5 text-left text-sm font-medium hover:bg-black/5 dark:hover:bg-white/5">
                           Create account
                         </button>
                       </>
@@ -273,11 +195,11 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
 
               <button
                 onClick={() => onNavigate('cart')}
-                className="relative p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                className="relative p-2.5 rounded-store text-gray-600 dark:text-gray-400 hover:text-[rgb(var(--color-foreground))] hover:bg-black/5 dark:hover:bg-white/5"
               >
                 <ShoppingCart size={20} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg">
+                  <span className="absolute -top-0.5 -right-0.5 bg-primary text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                     {cartCount}
                   </span>
                 )}
@@ -285,222 +207,82 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
             </div>
           </div>
 
-          {/* Search Bar - Mobile */}
+          {/* Mobile search */}
           <div className="lg:hidden mt-4">
             <form onSubmit={handleSearch} className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-4 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="input-store pl-11"
               />
-              <button 
-                type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-black dark:text-white"
-              >
-                <Search size={20} />
-              </button>
             </form>
           </div>
         </div>
 
-        {/* Navigation Bar */}
-        <nav className="bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="hidden lg:flex items-center justify-center gap-6 py-3">
-              <button
-                onClick={() => onNavigate('home')}
-                className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white dark:hover:bg-gray-700"
-              >
-                <Home size={16} />
-                Home
-              </button>
-              <button
-                onClick={() => onNavigate('categories')}
-                className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white dark:hover:bg-gray-700"
-              >
-                <Package size={16} />
-                Categories
-              </button>
-              <button
-                onClick={() => onNavigate('products')}
-                className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white dark:hover:bg-gray-700"
-              >
-                <Grid size={16} />
-                All Products
-              </button>
-              <button
-                onClick={() => onNavigate('products', 'gift-cards')}
-                className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white dark:hover:bg-gray-700"
-              >
-                <Gift size={16} />
-                Gift Cards
-              </button>
-              <button
-                onClick={() => onNavigate('products', 'deals')}
-                className="flex items-center gap-1.5 text-sm font-semibold text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-              >
-                <Flame size={16} />
-                Hot Deals
-              </button>
+        {/* Nav */}
+        <nav className="border-t border-[var(--border-subtle)] bg-[rgb(var(--color-background))]/50">
+          <div className="section-store">
+            <div className="hidden lg:flex items-center justify-center gap-1 py-3">
+              {[
+                { page: 'home' as const, label: 'Home', icon: Home },
+                { page: 'categories' as const, label: 'Categories', icon: Package },
+                { page: 'products' as const, label: 'All Products', icon: Grid },
+                { page: 'products', category: 'gift-cards', label: 'Gift Cards', icon: Gift },
+                { page: 'products', category: 'deals', label: 'Deals', icon: Flame },
+              ].map(({ page, category, label, icon: Icon }) => (
+                <button
+                  key={label}
+                  onClick={() => onNavigate(page, category)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-store text-sm font-medium transition-colors ${
+                    page === 'products' && category === 'deals'
+                      ? 'text-primary hover:bg-primary/10'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-[rgb(var(--color-foreground))] hover:bg-black/5 dark:hover:bg-white/5'
+                  }`}
+                >
+                  <Icon size={16} />
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
         </nav>
 
-        {/* Mobile Menu */}
+        {/* Mobile menu */}
         {showMobileMenu && (
-          <div className="lg:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-            <div className="px-4 py-4 space-y-2">
-              <button
-                onClick={() => { onNavigate('home'); setShowMobileMenu(false); }}
-                className="w-full text-left px-4 py-3 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl font-bold uppercase tracking-wide flex items-center gap-2"
-              >
-                <Home size={18} />
-                Home
-              </button>
-              <button
-                onClick={() => { onNavigate('categories'); setShowMobileMenu(false); }}
-                className="w-full text-left px-4 py-3 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl font-bold uppercase tracking-wide flex items-center gap-2"
-              >
-                <Package size={18} />
-                Shop by Category
-              </button>
-              <button
-                onClick={() => { onNavigate('products'); setShowMobileMenu(false); }}
-                className="w-full text-left px-4 py-3 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl font-bold uppercase tracking-wide flex items-center gap-2"
-              >
-                <Grid size={18} />
-                All Products
-              </button>
-              <button
-                onClick={() => { onNavigate('products', 'gift-cards'); setShowMobileMenu(false); }}
-                className="w-full text-left px-4 py-3 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl font-bold uppercase tracking-wide flex items-center gap-2"
-              >
-                <Gift size={18} />
-                Gift Cards
-              </button>
-              <button
-                onClick={() => { onNavigate('products', 'deals'); setShowMobileMenu(false); }}
-                className="w-full text-left px-4 py-3 text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl font-black uppercase tracking-wide flex items-center gap-2"
-              >
-                <Flame size={18} />
-                Hot Deals
-              </button>
+          <div className="lg:hidden border-t border-[var(--border-subtle)] bg-[rgb(var(--color-background))]">
+            <div className="section-store py-4 space-y-1">
+              {[
+                { page: 'home', label: 'Home', icon: Home },
+                { page: 'categories', label: 'Categories', icon: Package },
+                { page: 'products', label: 'All Products', icon: Grid },
+                { page: 'products', category: 'gift-cards', label: 'Gift Cards', icon: Gift },
+                { page: 'products', category: 'deals', label: 'Deals', icon: Flame },
+              ].map(({ page, category, label, icon: Icon }) => (
+                <button
+                  key={label}
+                  onClick={() => { onNavigate(page, category); setShowMobileMenu(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-store font-medium hover:bg-black/5 dark:hover:bg-white/5 text-left"
+                >
+                  <Icon size={18} />
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
         )}
       </header>
 
-      {/* Auth Modal - rendered in portal so it always appears on top */}
-      {showAuthModal &&
-        createPortal(
-          <div
-            className="fixed inset-0 flex items-center justify-center p-4 bg-black/60"
-            style={{ zIndex: 9999 }}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setShowAuthModal(false);
-                setAuthMessage(null);
-              }
-            }}
-          >
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="auth-modal-title"
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-8 border border-gray-200 dark:border-gray-700"
-              style={{ zIndex: 10000 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h2 id="auth-modal-title" className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {authMode === 'login' ? 'Welcome Back' : 'Create Account'}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAuthModal(false);
-                    setAuthMessage(null);
-                  }}
-                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded"
-                  aria-label="Close"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <form onSubmit={handleAuth} className="space-y-4">
-                <div>
-                  <label htmlFor="auth-email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Email
-                  </label>
-                  <input
-                    id="auth-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    autoComplete="email"
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
-                    placeholder="your@email.com"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="auth-password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Password
-                  </label>
-                  <input
-                    id="auth-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
-                    placeholder="••••••••"
-                  />
-                </div>
-
-                {authMessage && (
-                  <div
-                    className={`p-3 rounded-lg text-sm ${
-                      authMessage.type === 'success'
-                        ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800'
-                        : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'
-                    }`}
-                  >
-                    {authMessage.text}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                >
-                  {loading ? 'Please wait...' : authMode === 'login' ? 'Log In' : 'Sign Up'}
-                </button>
-
-                <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
-                  {authMode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMode(authMode === 'login' ? 'signup' : 'login');
-                      setAuthMessage(null);
-                    }}
-                    className="text-red-600 dark:text-red-400 font-semibold hover:underline"
-                  >
-                    {authMode === 'login' ? 'Sign Up' : 'Log In'}
-                  </button>
-                </p>
-              </form>
-            </div>
-          </div>,
-          document.body
-        )}
+      {showAuthModal && (
+        <LoginPage
+          onNavigate={onNavigate}
+          onClose={() => setShowAuthModal(false)}
+          embedded
+          initialMode={authMode}
+        />
+      )}
     </>
   );
 };

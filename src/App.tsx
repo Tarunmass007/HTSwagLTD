@@ -11,8 +11,9 @@ import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { Footer } from './components/footer';
 import { AdminPanel } from './pages/adminpanel';
+import { LoginPage } from './pages/LoginPage';
 
-type Page = 'home' | 'categories' | 'products' | 'cart' | 'checkout' | 'terms' | 'privacy' | 'tracking' | 'admin' | 'gift-cards' | 'deals';
+type Page = 'home' | 'categories' | 'products' | 'cart' | 'checkout' | 'terms' | 'privacy' | 'tracking' | 'admin' | 'gift-cards' | 'deals' | 'login';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -69,6 +70,8 @@ function App() {
         return <TrackingPage />;
       case 'admin':
         return <AdminPanel />;
+      case 'login':
+        return <LoginPage onNavigate={handleNavigate} />;
       default:
         return <HomePage searchQuery={searchQuery} onNavigate={handleNavigate} />;
     }
@@ -78,7 +81,7 @@ function App() {
     <ThemeProvider>
       <CurrencyLanguageProvider>
         <CartProvider>
-          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+          <div className="min-h-screen min-h-[100dvh] bg-gray-50 dark:bg-gray-900 transition-colors duration-200 overflow-x-hidden w-full max-w-[100vw]">
             <Header onNavigate={handleNavigate} onSearch={handleSearch} />
             <main>{renderPage()}</main>
             
@@ -96,12 +99,12 @@ function App() {
 }
 
 const TermsPage = () => (
-  <div className="max-w-4xl mx-auto px-4 py-12">
-    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">Terms of Service</h1>
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8 space-y-6 border border-gray-200 dark:border-gray-700">
+  <div className="section-store py-16 max-w-store-narrow mx-auto">
+    <h1 className="font-display text-3xl md:text-4xl font-semibold text-[rgb(var(--color-foreground))] mb-8">Terms of Service</h1>
+    <div className="bg-white dark:bg-gray-900/30 rounded-store-xl shadow-store p-8 space-y-6 border border-[var(--border-subtle)]">
       <section>
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">1. Acceptance of Terms</h2>
-        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+        <h2 className="font-display text-xl font-semibold text-[rgb(var(--color-foreground))] mb-3">1. Acceptance of Terms</h2>
+        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
           By accessing and using HTS Swag, you accept and agree to be bound by the terms and provision of this agreement.
         </p>
       </section>
@@ -126,12 +129,12 @@ const TermsPage = () => (
 );
 
 const PrivacyPage = () => (
-  <div className="max-w-4xl mx-auto px-4 py-12">
-    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">Privacy Policy</h1>
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8 space-y-6 border border-gray-200 dark:border-gray-700">
+  <div className="section-store py-16 max-w-store-narrow mx-auto">
+    <h1 className="font-display text-3xl md:text-4xl font-semibold text-[rgb(var(--color-foreground))] mb-8">Privacy Policy</h1>
+    <div className="bg-white dark:bg-gray-900/30 rounded-store-xl shadow-store p-8 space-y-6 border border-[var(--border-subtle)]">
       <section>
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">Information We Collect</h2>
-        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+        <h2 className="font-display text-xl font-semibold text-[rgb(var(--color-foreground))] mb-3">Information We Collect</h2>
+        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
           We collect information you provide directly to us, including name, email address, shipping address, 
           and payment information when you make a purchase.
         </p>
@@ -163,44 +166,39 @@ const TrackingPage = () => {
   };
   
   return (
-    <div className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8 text-center">Track Your Order</h1>
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-8 border border-gray-200 dark:border-gray-700">
+    <div className="section-store py-16 max-w-store-narrow mx-auto">
+      <h1 className="font-display text-3xl md:text-4xl font-semibold text-[rgb(var(--color-foreground))] mb-8 text-center">Track Your Order</h1>
+      <div className="bg-white dark:bg-gray-900/30 rounded-store-xl shadow-store p-8 border border-[var(--border-subtle)]">
         <form onSubmit={handleTrack} className="space-y-4 mb-8">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Order ID
-            </label>
+            <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-2">Order ID</label>
             <input
               type="text"
               value={orderId}
               onChange={(e) => setOrderId(e.target.value)}
               placeholder="Enter your order ID"
               required
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="input-store"
             />
           </div>
-          <button
-            type="submit"
-            className="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-all shadow-lg hover:shadow-xl"
-          >
+          <button type="submit" className="btn-store-primary w-full py-3.5">
             Track Order
           </button>
         </form>
         
         {tracking && (
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Order ID:</span>
-              <span className="text-sm text-gray-900 dark:text-white font-semibold">{tracking.orderId}</span>
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-store p-6 space-y-3">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600 dark:text-gray-400">Order ID:</span>
+              <span className="font-semibold">{tracking.orderId}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Status:</span>
-              <span className="text-sm text-green-700 dark:text-green-400 font-semibold">{tracking.status}</span>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600 dark:text-gray-400">Status:</span>
+              <span className="font-semibold text-green-600 dark:text-green-400">{tracking.status}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Estimated Delivery:</span>
-              <span className="text-sm text-gray-900 dark:text-white">{tracking.estimatedDelivery}</span>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600 dark:text-gray-400">Estimated Delivery:</span>
+              <span>{tracking.estimatedDelivery}</span>
             </div>
           </div>
         )}
