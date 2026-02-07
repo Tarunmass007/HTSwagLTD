@@ -2,6 +2,8 @@
 
 Follow these steps so OTP verification works when creating an account.
 
+**API endpoints used:** `/api/send-otp`, `/api/verify-otp`, `/api/create-account`
+
 ---
 
 ## Step 1: Create the `email_otps` table in Supabase

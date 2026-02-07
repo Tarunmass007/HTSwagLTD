@@ -58,7 +58,7 @@ html.dark {
 
 @layer components {
   .btn-store {
-    @apply inline-flex items-center justify-center px-5 py-2.5 font-semibold rounded-store text-sm transition-all duration-200;
+    @apply inline-flex items-center justify-center px-5 py-2.5 font-semibold rounded-xl text-sm transition-all duration-200;
   }
 
   .btn-store-primary {
@@ -74,7 +74,7 @@ html.dark {
   }
 
   .input-store {
-    @apply w-full px-4 py-2.5 rounded-store border border-[var(--border-subtle)] bg-white dark:bg-gray-900 text-[rgb(var(--color-foreground))] placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-all;
+    @apply w-full px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] bg-white dark:bg-gray-900 text-[rgb(var(--color-foreground))] placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary transition-all;
   }
 
   .card-product {
