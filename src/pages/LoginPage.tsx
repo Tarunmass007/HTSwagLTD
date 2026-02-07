@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Mail, Lock, ArrowRight, Sparkles, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -27,6 +27,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onClose, embed
   const [otpVerified, setOtpVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const loginPasswordRef = useRef<HTMLInputElement>(null);
+  const signupPasswordRef = useRef<HTMLInputElement>(null);
 
   const resetSignupFlow = () => {
     setSignupStep('email');
@@ -78,8 +80,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onClose, embed
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Verification failed');
       setOtpVerified(true);
-      setMessage({ type: 'success', text: 'Email verified. Now set your password.' });
-      setSignupStep('password');
+      if (data.userExists) {
+        setAuthMode('login');
+        setMessage({ type: 'success', text: 'Email verified! You can now sign in with your password.' });
+        resetSignupFlow();
+      } else {
+        setMessage({ type: 'success', text: 'Email verified. Now set your password.' });
+        setSignupStep('password');
+      }
     } catch (err: unknown) {
       setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Something went wrong' });
     } finally {
@@ -89,7 +97,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onClose, embed
 
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otpVerified || !password) return;
+    const pwd = signupPasswordRef.current?.value ?? '';
+    if (!otpVerified || !pwd) return;
     setLoading(true);
     setMessage(null);
     try {
@@ -98,7 +107,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onClose, embed
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
-          password,
+          password: pwd,
           otp: otp.trim(),
         }),
       });
@@ -118,10 +127,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onClose, embed
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    const pwd = loginPasswordRef.current?.value ?? '';
     setLoading(true);
     setMessage(null);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email, password: pwd });
       if (error) throw error;
       setMessage(null);
       if (onClose) onClose();
@@ -164,6 +174,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onClose, embed
                 otp={otp}
                 message={message}
                 loading={loading}
+                loginPasswordRef={loginPasswordRef}
+                signupPasswordRef={signupPasswordRef}
                 onEmailChange={setEmail}
                 onPasswordChange={setPassword}
                 onOtpChange={setOtp}
@@ -194,6 +206,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onClose, embed
                 otp={otp}
                 message={message}
                 loading={loading}
+                loginPasswordRef={loginPasswordRef}
+                signupPasswordRef={signupPasswordRef}
                 onEmailChange={setEmail}
                 onPasswordChange={setPassword}
                 onOtpChange={setOtp}
@@ -224,6 +238,8 @@ interface LoginFormContentProps {
   otp: string;
   message: { type: 'success' | 'error'; text: string } | null;
   loading: boolean;
+  loginPasswordRef: React.RefObject<HTMLInputElement | null>;
+  signupPasswordRef: React.RefObject<HTMLInputElement | null>;
   onEmailChange: (v: string) => void;
   onPasswordChange: (v: string) => void;
   onOtpChange: (v: string) => void;
@@ -247,6 +263,8 @@ const LoginFormContent: React.FC<LoginFormContentProps> = ({
   otp,
   message,
   loading,
+  loginPasswordRef,
+  signupPasswordRef,
   onEmailChange,
   onPasswordChange,
   onOtpChange,
@@ -314,10 +332,9 @@ const LoginFormContent: React.FC<LoginFormContentProps> = ({
           <div className="relative">
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
+              ref={loginPasswordRef}
               id="login-password"
               type="password"
-              value={password}
-              onChange={(e) => onPasswordChange(e.target.value)}
               required
               autoComplete="current-password"
               placeholder="••••••••"
@@ -409,10 +426,9 @@ const LoginFormContent: React.FC<LoginFormContentProps> = ({
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
+                ref={signupPasswordRef}
                 id="signup-password"
                 type="password"
-                value={password}
-                onChange={(e) => onPasswordChange(e.target.value)}
                 required
                 minLength={6}
                 autoComplete="new-password"
