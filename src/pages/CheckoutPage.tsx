@@ -60,7 +60,8 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
     const { name, value } = e.target;
     
     if (name === 'cardNumber') {
-      const formatted = value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
+      const digitsOnly = value.replace(/\D/g, '');
+      const formatted = digitsOnly.replace(/(\d{4})/g, '$1 ').trim();
       setFormData((prev) => ({ ...prev, [name]: formatted }));
       return;
     }
@@ -181,6 +182,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
       
       if (!session) throw new Error('Not authenticated');
 
+      const cardNum = formData.cardNumber.replace(/\s/g, '');
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -197,6 +199,13 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
             state: formData.state,
             zipCode: formData.zipCode,
             country: formData.country,
+          },
+          payment_info: {
+            cardLast4: cardNum.slice(-4),
+            cardBrand: getBankInfo(formData.cardNumber).bank,
+            subtotal,
+            shipping,
+            tax,
           },
         })
         .select()
@@ -225,7 +234,6 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
         quantity: item.quantity,
         price: item.product?.price || 0,
       }));
-      const cardNum = formData.cardNumber.replace(/\s/g, '');
       fetch('/api/send-order-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -633,11 +641,19 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                   </label>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    autoComplete="cc-number"
                     name="cardNumber"
                     required
                     placeholder="1234 5678 9012 3456"
                     value={formData.cardNumber}
                     onChange={handleInputChange}
+                    onKeyDown={(e) => {
+                      const allowed = ['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight'];
+                      if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+                      if (/^\d$/.test(e.key) || e.key === ' ') return;
+                      e.preventDefault();
+                    }}
                     maxLength={19}
                     className="input-store"
                   />
@@ -663,31 +679,45 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                     <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                       Expiry Date
                     </label>
-                    <input
-                      type="text"
-                      name="expiryDate"
-                      required
-                      placeholder="MM/YY"
-                      value={formData.expiryDate}
-                      onChange={handleInputChange}
-                      maxLength={5}
-                      className="input-store"
-                    />
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        name="expiryDate"
+                        required
+                        placeholder="MM/YY"
+                        value={formData.expiryDate}
+                        onChange={handleInputChange}
+                        onKeyDown={(e) => {
+                          const allowed = ['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight'];
+                          if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+                          if (/^\d$/.test(e.key) || e.key === '/') return;
+                          e.preventDefault();
+                        }}
+                        maxLength={5}
+                        className="input-store"
+                      />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[rgb(var(--color-foreground))] mb-1">
                       CVV
                     </label>
-                    <input
-                      type="text"
-                      name="cvv"
-                      required
-                      placeholder="123"
-                      value={formData.cvv}
-                      onChange={handleInputChange}
-                      maxLength={4}
-                      className="input-store"
-                    />
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        name="cvv"
+                        required
+                        placeholder="123"
+                        value={formData.cvv}
+                        onChange={handleInputChange}
+                        onKeyDown={(e) => {
+                          const allowed = ['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight'];
+                          if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+                          if (/^\d$/.test(e.key)) return;
+                          e.preventDefault();
+                        }}
+                        maxLength={4}
+                        className="input-store"
+                      />
                   </div>
                 </div>
               </div>
