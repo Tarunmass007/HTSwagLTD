@@ -389,7 +389,7 @@ const LoginFormContent: React.FC<LoginFormContentProps> = ({
           </div>
         </div>
 
-        {signupStep !== 'email' && (
+        {signupStep === 'otp' && (
           <div className="animate-fade-in">
             <label htmlFor="signup-otp" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
               Verification code
@@ -404,17 +404,14 @@ const LoginFormContent: React.FC<LoginFormContentProps> = ({
                 maxLength={6}
                 value={otp}
                 onChange={(e) => onOtpChange(e.target.value.replace(/\D/g, ''))}
-                disabled={signupStep === 'password'}
                 placeholder="000000"
-                className={`${inputBase} pl-11 font-mono text-lg tracking-[0.3em] text-center disabled:opacity-70 disabled:cursor-not-allowed`}
+                className={`${inputBase} pl-11 font-mono text-lg tracking-[0.3em] text-center`}
                 autoComplete="one-time-code"
               />
             </div>
-            {signupStep === 'otp' && (
-              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Enter the 6-digit code sent to <span className="font-medium text-gray-700 dark:text-gray-300">{email}</span>
-              </p>
-            )}
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              Enter the 6-digit code sent to <span className="font-medium text-gray-700 dark:text-gray-300">{email}</span>
+            </p>
           </div>
         )}
 
