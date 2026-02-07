@@ -41,9 +41,11 @@ git push -u origin main
 3. **Configure Project Settings**
    - **Framework Preset:** Vite (should auto-detect)
    - **Root Directory:** `./` (leave as default)
-   - **Build Command:** `vite build` (should auto-fill)
-   - **Output Directory:** `dist` (should auto-fill)
-   - **Install Command:** Leave as default (auto-detects npm/yarn/pnpm)
+   - **Build Command:** `npm run build` (use this, not `vite build` — avoids Vercel permission error)
+   - **Output Directory:** `dist`
+   - **Install Command:** `npm install`
+
+   > **Important:** The project uses `vercel.json` and `npm run build` to avoid the "Permission denied" error on Vercel's Linux build environment. Do not override with `vite build` directly.
 
 4. **Add Environment Variables**
    Click on "Environment Variables" and add:
