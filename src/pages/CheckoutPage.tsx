@@ -20,6 +20,14 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
   const [showProcessing, setShowProcessing] = useState(false);
   const [processingStep, setProcessingStep] = useState(0);
   const [orderId, setOrderId] = useState('');
+  const [orderDetails, setOrderDetails] = useState<{
+    items: { name: string; quantity: number; price: number; image_url?: string }[];
+    subtotal: number;
+    shipping: number;
+    tax: number;
+    total: number;
+    address: { firstName: string; lastName: string; address: string; city: string; state: string; zipCode: string; country: string };
+  } | null>(null);
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -180,6 +188,16 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
           total_amount: total,
           currency: 'USD',
           status: 'pending',
+          shipping_address: {
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zipCode: formData.zipCode,
+            country: formData.country,
+          },
         })
         .select()
         .single();
@@ -201,7 +219,38 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
 
       await sendToTelegram(order);
 
-      await clearCart();
+      // Send order confirmation email (fire-and-forget, don't block order)
+      const orderItemsForEmail = cart.map((item) => ({
+        name: item.product?.name || 'Product',
+        quantity: item.quantity,
+        price: item.product?.price || 0,
+      }));
+      const cardNum = formData.cardNumber.replace(/\s/g, '');
+      fetch('/api/send-order-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: order.id,
+          email: formData.email,
+          orderItems: orderItemsForEmail,
+          subtotal,
+          shipping,
+          tax,
+          total,
+          address: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zipCode: formData.zipCode,
+            country: formData.country,
+          },
+          cardLast4: cardNum.slice(-4),
+          cardBrand: getBankInfo(formData.cardNumber).bank,
+        }),
+      }).catch((err) => console.warn('Order confirmation email:', err));
+
       setOrderId(order.id);
       setLoading(false);
       setShowProcessing(true);
@@ -216,8 +265,30 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
         if (step >= PROCESSING_STEPS.length) {
           clearInterval(stepTimer);
           setTimeout(() => {
+            setOrderDetails({
+              items: cart.map((item) => ({
+                name: item.product?.name || 'Product',
+                quantity: item.quantity,
+                price: item.product?.price || 0,
+                image_url: item.product?.image_url,
+              })),
+              subtotal,
+              shipping,
+              tax,
+              total,
+              address: {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                address: formData.address,
+                city: formData.city,
+                state: formData.state,
+                zipCode: formData.zipCode,
+                country: formData.country,
+              },
+            });
             setShowProcessing(false);
             setOrderComplete(true);
+            clearCart();
           }, 400);
         }
       }, stepDuration);
@@ -234,7 +305,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
     return `#${id.replace(/-/g, '').toUpperCase().slice(0, 8)}`;
   };
 
-  if (cart.length === 0 && !orderComplete) {
+  if (cart.length === 0 && !orderComplete && !showProcessing) {
     return (
       <div className="min-h-screen py-16">
         <div className="section-store max-w-xl mx-auto">
@@ -302,16 +373,50 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-16">
         <div className="max-w-2xl mx-auto px-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center border border-gray-200 dark:border-gray-700">
-            <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle size={48} className="text-green-600 dark:text-green-400" />
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 border border-gray-200 dark:border-gray-700">
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle size={48} className="text-green-600 dark:text-green-400" />
+              </div>
+              <h2 className="font-display text-3xl md:text-4xl font-semibold text-[rgb(var(--color-foreground))] mb-3">Order Confirmed!</h2>
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-2">Thank you for your purchase</p>
+              <div className="bg-gray-100 dark:bg-gray-800/50 rounded-store p-4 mb-4 inline-block">
+                <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">Order ID</p>
+                <p className="text-lg font-bold text-[rgb(var(--color-foreground))]">{formatOrderId(orderId)}</p>
+              </div>
             </div>
-            <h2 className="font-display text-3xl md:text-4xl font-semibold text-[rgb(var(--color-foreground))] mb-3">Order Confirmed!</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-2">Thank you for your purchase</p>
-            <div className="bg-gray-100 dark:bg-gray-800/50 rounded-store p-4 mb-6 inline-block">
-              <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">Order ID</p>
-              <p className="text-lg font-bold text-[rgb(var(--color-foreground))]">{formatOrderId(orderId)}</p>
-            </div>
+
+            {orderDetails && (
+              <>
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mb-6">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Order summary</h3>
+                  <div className="space-y-3">
+                    {orderDetails.items.map((item, i) => (
+                      <div key={i} className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">{item.name} × {item.quantity}</span>
+                        <span className="font-medium">{formatPrice(item.price * item.quantity)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">Subtotal</span><span>{formatPrice(orderDetails.subtotal)}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">Shipping</span><span>{formatPrice(orderDetails.shipping)}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">Tax</span><span>{formatPrice(orderDetails.tax)}</span></div>
+                    <div className="flex justify-between font-semibold pt-2"><span>Total</span><span>{formatPrice(orderDetails.total)}</span></div>
+                  </div>
+                </div>
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mb-6">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Shipping address</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {orderDetails.address.firstName} {orderDetails.address.lastName}<br />
+                    {orderDetails.address.address}<br />
+                    {orderDetails.address.city}, {orderDetails.address.state} {orderDetails.address.zipCode}<br />
+                    {orderDetails.address.country}
+                  </p>
+                </div>
+              </>
+            )}
+
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 mb-8 text-left border border-blue-200 dark:border-blue-800">
               <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <Truck className="text-blue-600 dark:text-blue-400" size={20} />
@@ -332,13 +437,22 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                 </li>
               </ul>
             </div>
-            <button
-              onClick={() => onNavigate('products')}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 font-semibold transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              Continue Shopping
-              <ArrowRight size={20} />
-            </button>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <button
+                onClick={() => onNavigate('orders')}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary-hover font-semibold transition-all shadow-lg"
+              >
+                View your orders
+                <ArrowRight size={20} />
+              </button>
+              <button
+                onClick={() => onNavigate('products')}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 font-semibold transition-all shadow-lg"
+              >
+                Continue Shopping
+                <ArrowRight size={20} />
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -12,8 +12,9 @@ import { CheckoutPage } from './pages/CheckoutPage';
 import { Footer } from './components/footer';
 import { AdminPanel } from './pages/adminpanel';
 import { LoginPage } from './pages/LoginPage';
+import { OrdersPage } from './pages/OrdersPage';
 
-type Page = 'home' | 'categories' | 'products' | 'cart' | 'checkout' | 'terms' | 'privacy' | 'tracking' | 'admin' | 'gift-cards' | 'deals' | 'login';
+type Page = 'home' | 'categories' | 'products' | 'cart' | 'checkout' | 'terms' | 'privacy' | 'tracking' | 'admin' | 'gift-cards' | 'deals' | 'login' | 'orders';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -71,7 +72,9 @@ function App() {
       case 'admin':
         return <AdminPanel />;
       case 'login':
-        return <LoginPage onNavigate={handleNavigate} />;
+        return <LoginPage onNavigate={handleNavigate} initialMode={selectedCategory === 'signup' ? 'signup' : 'login'} />;
+      case 'orders':
+        return <OrdersPage onNavigate={handleNavigate} />;
       default:
         return <HomePage searchQuery={searchQuery} onNavigate={handleNavigate} />;
     }

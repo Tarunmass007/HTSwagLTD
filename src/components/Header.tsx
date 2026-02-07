@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, ShoppingCart, User, ChevronDown, Moon, Sun, Menu, X, Home, Package, Gift, Flame, Grid } from 'lucide-react';
+import { Search, ShoppingCart, User, ChevronDown, Moon, Sun, Menu, X, Home, Package, Gift, Flame, Grid, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeProvider';
 import { useCurrencyLanguage, languages, currencies } from '../context/CurrencyLanguageContext';
-import { LoginPage } from '../pages/LoginPage';
-
 interface HeaderProps {
   onNavigate: (page: string, category?: string) => void;
   onSearch: (query: string) => void;
@@ -48,9 +46,8 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
   };
 
   const openAuth = (mode: 'login' | 'signup') => {
-    setAuthMode(mode);
-    setShowAuthModal(true);
     setShowUserMenu(false);
+    onNavigate('login', mode === 'signup' ? 'signup' : undefined);
   };
 
   return (
@@ -173,12 +170,21 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
                 {showUserMenu && (
                   <div className="absolute right-0 mt-2 w-52 bg-[rgb(var(--color-background))] border border-[var(--border-subtle)] rounded-store shadow-store-lg py-2 z-50">
                     {isAuthenticated ? (
-                      <button
-                        onClick={handleLogout}
-                        className="w-full px-4 py-2.5 text-left text-sm font-medium hover:bg-black/5 dark:hover:bg-white/5"
-                      >
-                        Sign out
-                      </button>
+                      <>
+                        <button
+                          onClick={() => { onNavigate('orders'); setShowUserMenu(false); }}
+                          className="w-full px-4 py-2.5 text-left text-sm font-medium hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-2"
+                        >
+                          <ShoppingBag size={16} />
+                          Your orders
+                        </button>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full px-4 py-2.5 text-left text-sm font-medium hover:bg-black/5 dark:hover:bg-white/5"
+                        >
+                          Sign out
+                        </button>
+                      </>
                     ) : (
                       <>
                         <button onClick={() => openAuth('login')} className="w-full px-4 py-2.5 text-left text-sm font-medium hover:bg-black/5 dark:hover:bg-white/5">
@@ -232,6 +238,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
                 { page: 'products' as const, label: 'All Products', icon: Grid },
                 { page: 'products', category: 'gift-cards', label: 'Gift Cards', icon: Gift },
                 { page: 'products', category: 'deals', label: 'Deals', icon: Flame },
+                { page: 'orders' as const, label: 'Your orders', icon: ShoppingBag },
               ].map(({ page, category, label, icon: Icon }) => (
                 <button
                   key={label}
@@ -260,6 +267,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
                 { page: 'products', label: 'All Products', icon: Grid },
                 { page: 'products', category: 'gift-cards', label: 'Gift Cards', icon: Gift },
                 { page: 'products', category: 'deals', label: 'Deals', icon: Flame },
+                { page: 'orders', label: 'Your orders', icon: ShoppingBag },
               ].map(({ page, category, label, icon: Icon }) => (
                 <button
                   key={label}
@@ -274,15 +282,6 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
           </div>
         )}
       </header>
-
-      {showAuthModal && (
-        <LoginPage
-          onNavigate={onNavigate}
-          onClose={() => setShowAuthModal(false)}
-          embedded
-          initialMode={authMode}
-        />
-      )}
     </>
   );
 };
