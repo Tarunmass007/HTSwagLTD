@@ -1,8 +1,6 @@
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 
-export const config = { runtime: 'edge' as const };
-
 const resend = new Resend(process.env.RESEND_API_KEY);
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -11,37 +9,25 @@ function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-export default async function handler(req: Request) {
+export default async function handler(req: { method?: string; body?: { email?: string } }, res: { status: (n: number) => unknown; json: (o: object) => void }) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { email } = await req.json();
+    const { email } = req.body || {};
     if (!email || typeof email !== 'string') {
-      return new Response(JSON.stringify({ error: 'Email is required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(400).json({ error: 'Email is required' });
     }
 
     const trimmedEmail = email.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmedEmail)) {
-      return new Response(JSON.stringify({ error: 'Invalid email format' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(400).json({ error: 'Invalid email format' });
     }
 
     if (!process.env.RESEND_API_KEY) {
-      return new Response(JSON.stringify({ error: 'Email service not configured' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(500).json({ error: 'Email service not configured' });
     }
 
     const otp = generateOTP();
@@ -108,21 +94,12 @@ export default async function handler(req: Request) {
 
     if (error) {
       console.error('Resend error:', error);
-      return new Response(JSON.stringify({ error: 'Failed to send verification email' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(500).json({ error: 'Failed to send verification email' });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(200).json({ success: true });
   } catch (err) {
     console.error('Send OTP error:', err);
-    return new Response(JSON.stringify({ error: 'Something went wrong' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(500).json({ error: 'Something went wrong' });
   }
 }

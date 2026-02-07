@@ -1,35 +1,24 @@
 import { createClient } from '@supabase/supabase-js';
 
-export const config = { runtime: 'edge' as const };
-
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-export default async function handler(req: Request) {
+export default async function handler(req: { method?: string; body?: { email?: string; otp?: string } }, res: { status: (n: number) => unknown; json: (o: object) => void }) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { email, otp } = await req.json();
+    const { email, otp } = req.body || {};
     if (!email || !otp || typeof email !== 'string' || typeof otp !== 'string') {
-      return new Response(JSON.stringify({ error: 'Email and OTP are required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(400).json({ error: 'Email and OTP are required' });
     }
 
     const trimmedEmail = email.trim().toLowerCase();
     const trimmedOtp = otp.trim();
 
     if (!supabaseUrl || !supabaseServiceKey) {
-      return new Response(JSON.stringify({ error: 'Service not configured' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(500).json({ error: 'Service not configured' });
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -44,46 +33,28 @@ export default async function handler(req: Request) {
 
     if (fetchError) {
       console.error('Supabase error:', fetchError);
-      return new Response(JSON.stringify({ error: 'Verification failed' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(500).json({ error: 'Verification failed' });
     }
 
     if (!records || records.length === 0) {
-      return new Response(JSON.stringify({ error: 'Invalid or expired verification code' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(400).json({ error: 'Invalid or expired verification code' });
     }
 
     const record = records[0];
     if (record.used) {
-      return new Response(JSON.stringify({ error: 'This code has already been used' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(400).json({ error: 'This code has already been used' });
     }
 
     if (new Date(record.expires_at) < new Date()) {
-      return new Response(JSON.stringify({ error: 'Verification code has expired' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return res.status(400).json({ error: 'Verification code has expired' });
     }
 
     // Mark as used
     await supabase.from('email_otps').update({ used: true }).eq('id', record.id);
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(200).json({ success: true });
   } catch (err) {
     console.error('Verify OTP error:', err);
-    return new Response(JSON.stringify({ error: 'Something went wrong' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return res.status(500).json({ error: 'Something went wrong' });
   }
 }
