@@ -61,17 +61,16 @@ export default async function handler(req: { method?: string; body?: { email?: s
       return res.status(400).json({ error: 'Verification code has expired' });
     }
 
-    // Mark OTP as used
-    await supabase.from('email_otps').update({ used: true }).eq('id', record.id);
-
-    // If user already exists with unconfirmed email, confirm it now (fixes "Email not confirmed" for old signups)
+    // Check if user exists and needs email confirmation
     let userExists = false;
     const { data: listData } = await supabase.auth.admin.listUsers({ perPage: 500 });
     const existingUser = listData?.users?.find((u) => u.email?.toLowerCase() === trimmedEmail);
     if (existingUser && !existingUser.email_confirmed_at) {
       await supabase.auth.admin.updateUserById(existingUser.id, { email_confirm: true });
       userExists = true;
+      await supabase.from('email_otps').update({ used: true }).eq('id', record.id);
     }
+    // For new users: do NOT mark OTP as used - create-account will use it once when they click Create account
 
     return res.status(200).json({ success: true, userExists });
   } catch (err) {

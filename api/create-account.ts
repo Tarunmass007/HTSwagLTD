@@ -38,7 +38,14 @@ export default async function handler(
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 1. Verify OTP first
+    // 0. Check if user already exists (don't use OTP for existing users)
+    const { data: listData } = await supabase.auth.admin.listUsers({ perPage: 500 });
+    const existingUser = listData?.users?.find((u) => u.email?.toLowerCase() === trimmedEmail);
+    if (existingUser) {
+      return res.status(400).json({ error: 'An account with this email already exists. Please sign in.' });
+    }
+
+    // 1. Verify OTP (only place that marks OTP as used for new signups)
     const { data: records, error: fetchError } = await supabase
       .from('email_otps')
       .select('id, used, expires_at')
@@ -74,8 +81,8 @@ export default async function handler(
 
     if (createError) {
       console.error('Create user error:', createError);
-      if (createError.message?.includes('already been registered')) {
-        return res.status(400).json({ error: 'An account with this email already exists' });
+      if (createError.message?.includes('already been registered') || createError.message?.includes('already exists')) {
+        return res.status(400).json({ error: 'An account with this email already exists. Please sign in.' });
       }
       return res.status(400).json({ error: createError.message || 'Failed to create account' });
     }

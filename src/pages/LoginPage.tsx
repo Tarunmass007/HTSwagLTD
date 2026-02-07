@@ -456,7 +456,7 @@ const LoginFormContent: React.FC<LoginFormContentProps> = ({
               : signupStep === 'email'
                 ? 'Send verification code'
                 : signupStep === 'otp'
-                  ? 'Verify code'
+                  ? 'Continue'
                   : 'Create account'}
             <ArrowRight size={18} className={loading ? 'hidden' : ''} />
           </button>
