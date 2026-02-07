@@ -9,19 +9,23 @@ function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-export default async function handler(req: { method?: string; body?: { email?: string } | string }, res: { status: (n: number) => unknown; json: (o: object) => void }) {
+type Res = { status: (n: number) => Res; json: (o: object) => void };
+
+export default async function handler(req: { method?: string; body?: { email?: string } | string }, res: Res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    let body = req.body;
-    if (typeof body === 'string') {
+    let body: { email?: string } | undefined;
+    if (typeof req.body === 'string') {
       try {
-        body = JSON.parse(body);
+        body = JSON.parse(req.body) as { email?: string };
       } catch {
         return res.status(400).json({ error: 'Invalid JSON body' });
       }
+    } else {
+      body = req.body;
     }
     const { email } = body || {};
     if (!email || typeof email !== 'string') {
