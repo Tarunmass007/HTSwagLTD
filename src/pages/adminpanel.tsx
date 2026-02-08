@@ -42,6 +42,8 @@ export const AdminPanel: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
   const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -125,12 +127,23 @@ export const AdminPanel: React.FC = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session || session.user.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) return;
 
-    const res = await fetch('/api/admin-orders', {
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    });
-    const json = await res.json();
-    if (res.ok && json.orders) {
-      setOrders(json.orders);
+    setOrdersLoading(true);
+    setOrdersError(null);
+    try {
+      const apiBase = import.meta.env.VITE_API_URL || '';
+      const res = await fetch(`${apiBase}/api/admin-orders`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const json = await res.json();
+      if (res.ok && json.orders) {
+        setOrders(json.orders);
+      } else {
+        setOrdersError(json.error || 'Failed to load orders');
+      }
+    } catch (err) {
+      setOrdersError(err instanceof Error ? err.message : 'Failed to load orders');
+    } finally {
+      setOrdersLoading(false);
     }
   };
 
@@ -138,7 +151,8 @@ export const AdminPanel: React.FC = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
-    const res = await fetch('/api/admin-update-order', {
+    const apiBase = import.meta.env.VITE_API_URL || '';
+    const res = await fetch(`${apiBase}/api/admin-update-order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
       body: JSON.stringify({ orderId, status, shipping_stage }),
@@ -179,12 +193,23 @@ export const AdminPanel: React.FC = () => {
 
   const cancelBroadcast = async (id: string) => {
     if (!confirm('Cancel this broadcast? It will stop showing for all users.')) return;
-    const { error } = await supabase.from('broadcasts').update({ active: false }).eq('id', id);
-    if (!error) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      alert('❌ Please sign in again.');
+      return;
+    }
+    const apiBase = import.meta.env.VITE_API_URL || '';
+    const res = await fetch(`${apiBase}/api/admin-cancel-broadcast`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ id }),
+    });
+    const json = await res.json();
+    if (res.ok) {
       alert('✅ Broadcast cancelled.');
       fetchBroadcasts();
     } else {
-      alert('❌ ' + error.message);
+      alert('❌ ' + (json.error || 'Failed to cancel'));
     }
   };
 
@@ -431,7 +456,10 @@ export const AdminPanel: React.FC = () => {
           ].map(({ id, label, icon: Icon }) => (
             <button
               key={id}
-              onClick={() => setActiveTab(id)}
+              onClick={() => {
+                setActiveTab(id);
+                if (id === 'orders') fetchOrders();
+              }}
               className={`flex items-center gap-2 px-4 py-3 font-semibold border-b-2 transition-colors ${
                 activeTab === id
                   ? 'border-red-600 text-red-600'
@@ -519,10 +547,24 @@ export const AdminPanel: React.FC = () => {
         {/* Orders Tab */}
         {activeTab === 'orders' && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden mb-8 shadow-lg border border-gray-200 dark:border-gray-700">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Manage Orders</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Updates will reflect instantly for users in their Orders page.</p>
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Manage Orders</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Updates will reflect instantly for users in their Orders page. Run <code className="text-xs bg-gray-200 dark:bg-gray-700 px-1 rounded">SUPABASE_SETUP.sql</code> if shipping updates fail.</p>
+              </div>
+              <button
+                onClick={fetchOrders}
+                disabled={ordersLoading}
+                className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium text-sm disabled:opacity-50"
+              >
+                {ordersLoading ? 'Loading...' : 'Refresh'}
+              </button>
             </div>
+            {ordersError && (
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm">
+                {ordersError}
+              </div>
+            )}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-100 dark:bg-gray-700">
@@ -536,7 +578,13 @@ export const AdminPanel: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.length === 0 ? (
+                  {ordersLoading && orders.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
+                        Loading orders...
+                      </td>
+                    </tr>
+                  ) : orders.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
                         No orders yet.

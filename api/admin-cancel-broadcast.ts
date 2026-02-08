@@ -5,14 +5,30 @@ const ADMIN_EMAIL = 'tarunmass932007@gmail.com';
 type Res = { status: (n: number) => Res; json: (o: object) => void };
 
 export default async function handler(
-  req: { method?: string; headers?: { authorization?: string } },
+  req: { method?: string; headers?: { authorization?: string }; body?: { id?: string } | string },
   res: Res
 ) {
-  if (req.method !== 'GET') {
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
+    let body: { id?: string } | undefined;
+    if (typeof req.body === 'string') {
+      try {
+        body = JSON.parse(req.body);
+      } catch {
+        return res.status(400).json({ error: 'Invalid JSON body' });
+      }
+    } else {
+      body = req.body;
+    }
+
+    const { id } = body || {};
+    if (!id) {
+      return res.status(400).json({ error: 'Broadcast id is required' });
+    }
+
     const authHeader = req.headers?.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -38,34 +54,16 @@ export default async function handler(
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    const { data, error } = await supabase
-      .from('orders')
-      .select('id, user_id, total_amount, currency, status, created_at, shipping_address')
-      .order('created_at', { ascending: false });
+    const { error } = await supabase.from('broadcasts').update({ active: false }).eq('id', id);
 
     if (error) {
+      console.error('Cancel broadcast error:', error);
       return res.status(500).json({ error: error.message });
     }
 
-    const baseOrders = data || [];
-    let orders = baseOrders.map((o: Record<string, unknown>) => ({ ...o, shipping_stage: 'ordered' }));
-
-    const ids = baseOrders.map((o: { id: string }) => o.id);
-    const stageRes = ids.length > 0
-      ? await supabase.from('orders').select('id, shipping_stage').in('id', ids)
-      : { data: [], error: null };
-    if (stageRes.data?.length && !stageRes.error) {
-      const map = new Map((stageRes.data as { id: string; shipping_stage?: string }[]).map((s) => [s.id, s.shipping_stage || 'ordered']));
-      orders = baseOrders.map((o: Record<string, unknown>) => ({
-        ...o,
-        shipping_stage: map.get(o.id as string) ?? 'ordered',
-      }));
-    }
-
-    return res.status(200).json({ orders });
+    return res.status(200).json({ success: true });
   } catch (err) {
-    console.error('Admin orders error:', err);
+    console.error('Cancel broadcast error:', err);
     return res.status(500).json({ error: 'Something went wrong' });
   }
 }

@@ -2,9 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
+const DISMISSED_KEY = 'htswag_broadcast_dismissed';
+
+function getDismissedIds(): string[] {
+  try {
+    const s = localStorage.getItem(DISMISSED_KEY);
+    return s ? JSON.parse(s) : [];
+  } catch {
+    return [];
+  }
+}
+
+function addDismissedId(id: string) {
+  try {
+    const ids = getDismissedIds();
+    if (!ids.includes(id)) {
+      ids.push(id);
+      localStorage.setItem(DISMISSED_KEY, JSON.stringify(ids));
+    }
+  } catch {
+    // ignore
+  }
+}
+
 export const BroadcastBanner: React.FC = () => {
   const [broadcast, setBroadcast] = useState<{ id: string; message: string } | null>(null);
-  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     const fetchLatest = async () => {
@@ -15,7 +37,7 @@ export const BroadcastBanner: React.FC = () => {
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (data?.message) setBroadcast(data);
+      if (data?.message && !getDismissedIds().includes(data.id)) setBroadcast(data);
       else setBroadcast(null);
     };
     fetchLatest();
@@ -32,7 +54,12 @@ export const BroadcastBanner: React.FC = () => {
     };
   }, []);
 
-  if (!broadcast?.message || dismissed) return null;
+  const handleDismiss = () => {
+    if (broadcast?.id) addDismissedId(broadcast.id);
+    setBroadcast(null);
+  };
+
+  if (!broadcast?.message) return null;
 
   return (
     <div className="relative overflow-hidden bg-[rgb(var(--color-foreground))] text-[rgb(var(--color-background))] py-2 text-xs md:text-sm font-medium">
@@ -44,7 +71,7 @@ export const BroadcastBanner: React.FC = () => {
         </div>
       </div>
       <button
-        onClick={() => setDismissed(true)}
+        onClick={handleDismiss}
         className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded hover:bg-white/10 transition-colors z-10"
         aria-label="Dismiss"
       >
