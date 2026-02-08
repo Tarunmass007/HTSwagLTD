@@ -632,7 +632,7 @@ export const AdminPanel: React.FC = () => {
                           <select
                             value={order.status}
                             onChange={(e) => updateOrderStatus(order.id, e.target.value, order.shipping_stage)}
-                            className="text-sm border rounded-lg px-2 py-1 bg-white dark:bg-gray-700"
+                            className="text-sm border border-[var(--border-subtle)] rounded-lg px-2 py-1 bg-white dark:bg-gray-800 text-[rgb(var(--color-foreground))]"
                           >
                             <option value="pending">Pending</option>
                             <option value="processing">Processing</option>
@@ -645,7 +645,7 @@ export const AdminPanel: React.FC = () => {
                           <select
                             value={order.shipping_stage || 'ordered'}
                             onChange={(e) => updateOrderStatus(order.id, order.status, e.target.value)}
-                            className="text-sm border rounded-lg px-2 py-1 bg-white dark:bg-gray-700"
+                            className="text-sm border border-[var(--border-subtle)] rounded-lg px-2 py-1 bg-white dark:bg-gray-800 text-[rgb(var(--color-foreground))]"
                           >
                             <option value="ordered">Ordered</option>
                             <option value="preparing">Preparing</option>

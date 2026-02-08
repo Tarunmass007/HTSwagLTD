@@ -72,6 +72,7 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate }) => {
           total_amount,
           currency,
           status,
+          shipping_stage,
           created_at,
           shipping_address,
           payment_info,
@@ -144,9 +145,10 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate }) => {
     const stage = order.shipping_stage || 'ordered';
     const idx = SHIPPING_STAGES.findIndex((s) => s.key === stage);
     const currentIdx = idx >= 0 ? idx : 0;
-    const percent = ((currentIdx + 1) / SHIPPING_STAGES.length) * 100;
-    if (order.status === 'cancelled' || order.status === 'refunded') return { percent: 0, currentIdx: -1 };
-    return { percent, currentIdx };
+    const filledSegments = currentIdx + 1;
+    const percent = (filledSegments / SHIPPING_STAGES.length) * 100;
+    if (order.status === 'cancelled' || order.status === 'refunded') return { percent: 0, currentIdx: -1, filledSegments: 0 };
+    return { percent, currentIdx, filledSegments };
   };
 
   const getOrderItemProduct = (item: OrderItem) => item.product || item.products || null;
@@ -238,7 +240,7 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate }) => {
           {(selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'refunded') && (
             <div className="mb-6 bg-white dark:bg-gray-900 rounded-2xl p-6 border border-[var(--border-subtle)] shadow-store">
               <h3 className="font-semibold text-[rgb(var(--color-foreground))] mb-4">Shipping progress</h3>
-              <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center justify-between gap-2 mb-3">
                 {SHIPPING_STAGES.map((s, i) => (
                   <span
                     key={s.key}
@@ -253,11 +255,19 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate }) => {
                   </span>
                 ))}
               </div>
-              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-all duration-500 rounded-full"
-                  style={{ width: `${getShippingProgress(selectedOrder).percent}%` }}
-                />
+              {/* Segmented progress bar: fills one segment at a time */}
+              <div className="flex gap-0.5 rounded-full overflow-hidden h-2.5 bg-gray-200 dark:bg-gray-700">
+                {SHIPPING_STAGES.map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 h-full rounded-sm transition-all duration-500 ease-out"
+                    style={{
+                      backgroundColor: i < getShippingProgress(selectedOrder).filledSegments
+                        ? 'rgb(var(--color-accent))'
+                        : 'transparent',
+                    }}
+                  />
+                ))}
               </div>
             </div>
           )}
@@ -285,11 +295,11 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate }) => {
             <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-[var(--border-subtle)] shadow-store">
               <h3 className="font-semibold text-[rgb(var(--color-foreground))] mb-4">Order summary</h3>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span>{formatPrice(subtotal)}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Shipping</span><span>{shipping === 0 ? 'Free' : formatPrice(shipping)}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Tax</span><span>{formatPrice(tax)}</span></div>
+                <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Subtotal</span><span>{formatPrice(subtotal)}</span></div>
+                <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Shipping</span><span>{shipping === 0 ? 'Free' : formatPrice(shipping)}</span></div>
+                <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Tax</span><span>{formatPrice(tax)}</span></div>
                 <div className="flex justify-between font-bold pt-2 border-t border-gray-200 dark:border-gray-700">
-                  <span>Total</span>
+                  <span className="text-[rgb(var(--color-foreground))]">Total</span>
                   <span>{formatPrice(selectedOrder.total_amount)} {selectedOrder.currency}</span>
                 </div>
               </div>
@@ -313,7 +323,7 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate }) => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-[rgb(var(--color-foreground))]">{product?.name || 'Product'}</p>
-                      <p className="text-sm text-gray-500">Qty: {item.quantity} × {formatPrice(item.price)}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Qty: {item.quantity} × {formatPrice(item.price)}</p>
                     </div>
                     <div className="font-semibold text-right">{formatPrice(item.price * item.quantity)}</div>
                   </div>
@@ -418,11 +428,18 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate }) => {
                           </span>
                         ))}
                       </div>
-                      <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary transition-all duration-500 rounded-full"
-                          style={{ width: `${getShippingProgress(order).percent}%` }}
-                        />
+                      <div className="flex gap-0.5 rounded-full overflow-hidden h-1.5 bg-gray-200 dark:bg-gray-700">
+                        {SHIPPING_STAGES.map((_, i) => (
+                          <div
+                            key={i}
+                            className="flex-1 h-full rounded-sm transition-all duration-500 ease-out"
+                            style={{
+                              backgroundColor: i < getShippingProgress(order).filledSegments
+                                ? 'rgb(var(--color-accent))'
+                                : 'transparent',
+                            }}
+                          />
+                        ))}
                       </div>
                     </div>
                   )}
