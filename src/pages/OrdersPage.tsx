@@ -45,12 +45,14 @@ interface OrdersPageProps {
   selectedOrderId?: string | null;
 }
 
-export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate, selectedOrderId: initialOrderId }) => {
+export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate }) => {
+  const { orderId: urlOrderId } = useParams<{ orderId?: string }>();
+  const navigate = useNavigate();
   const { isAuthenticated } = useCart();
   const { formatPrice } = useCurrencyLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(initialOrderId || null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(urlOrderId || null);
 
   const fetchOrders = async () => {
     if (!isAuthenticated) {
@@ -62,35 +64,43 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate, selectedOrde
       setLoading(false);
       return;
     }
-    const { data, error } = await supabase
-      .from('orders')
-      .select(`
-        id,
-        total_amount,
-        currency,
-        status,
-        shipping_stage,
-        created_at,
-        shipping_address,
-        payment_info,
-        order_items (
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
           id,
-          quantity,
-          price,
-          product:products(name, image_url)
-        )
-      `)
-      .eq('user_id', session.user.id)
-      .order('created_at', { ascending: false });
+          total_amount,
+          currency,
+          status,
+          created_at,
+          shipping_address,
+          payment_info,
+          order_items (
+            id,
+            quantity,
+            price,
+            product:products(name, image_url)
+          )
+        `)
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
 
-    if (!error && data) {
-      setOrders(data as Order[]);
-      if (urlOrderId && data.some((o: Order) => o.id === urlOrderId)) {
-        setSelectedOrderId(urlOrderId);
+      if (!error && data) {
+        setOrders(data as Order[]);
+        if (urlOrderId && data.some((o: Order) => o.id === urlOrderId)) {
+          setSelectedOrderId(urlOrderId);
+        }
       }
+    } catch (err) {
+      console.error('Orders fetch error:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
+
+  useEffect(() => {
+    setSelectedOrderId(urlOrderId || null);
+  }, [urlOrderId]);
 
   useEffect(() => {
     fetchOrders();

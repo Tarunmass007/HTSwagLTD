@@ -85,8 +85,8 @@ function App() {
                 <Route path="/products/deals" element={<ProductsPage searchQuery={searchQuery} category="deals" />} />
                 <Route path="/cart" element={<CartPage onNavigate={handleNavigate} />} />
                 <Route path="/checkout" element={<CheckoutPage onNavigate={handleNavigate} />} />
-                <Route path="/orders" element={<OrdersPage onNavigate={handleNavigate} />} />
                 <Route path="/orders/:orderId" element={<OrdersPage onNavigate={handleNavigate} />} />
+                <Route path="/orders" element={<OrdersPage onNavigate={handleNavigate} />} />
                 <Route path="/login" element={<LoginPage onNavigate={handleNavigate} initialMode="login" />} />
                 <Route path="/signup" element={<LoginPage onNavigate={handleNavigate} initialMode="signup" />} />
                 <Route path="/terms" element={<TermsPage />} />
