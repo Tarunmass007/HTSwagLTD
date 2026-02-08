@@ -3,5 +3,12 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "framework": "vite"
+  "framework": "vite",
+  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }],
+  "crons": [
+    {
+      "path": "/api/abandoned-cart-email",
+      "schedule": "0 10 * * *"
+    }
+  ]
 }

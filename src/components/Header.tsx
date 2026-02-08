@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
 
   const openAuth = (mode: 'login' | 'signup') => {
     setShowUserMenu(false);
-    onNavigate('login', mode === 'signup' ? 'signup' : undefined);
+    onNavigate(mode === 'signup' ? 'signup' : 'login');
   };
 
   return (

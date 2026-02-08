@@ -82,13 +82,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onShowNewsletter }) 
             <ul className="space-y-2.5">
               {[
                 { page: 'products', label: 'All Products' },
-                { page: 'gift-cards', label: 'Gift Cards' },
-                { page: 'deals', label: 'Hot Deals' },
-                { page: 'products', label: 'Custom Orders' },
-              ].map(({ page, label }) => (
+                { page: 'products', category: 'gift-cards', label: 'Gift Cards' },
+                { page: 'products', category: 'deals', label: 'Hot Deals' },
+              ].map(({ page, label, category }) => (
                 <li key={label}>
                   <button
-                    onClick={() => onNavigate(page)}
+                    onClick={() => onNavigate(page, category)}
                     className="text-white/70 hover:text-white text-sm transition-colors"
                   >
                     {label}

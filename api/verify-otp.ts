@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
+import { Resend } from 'resend';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+const resend = new Resend(process.env.RESEND_API_KEY);
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 type Res = { status: (n: number) => Res; json: (o: object) => void };
@@ -71,6 +73,23 @@ export default async function handler(req: { method?: string; body?: { email?: s
       await supabase.from('email_otps').update({ used: true }).eq('id', record.id);
     }
     // For new users: do NOT mark OTP as used - create-account will use it once when they click Create account
+
+    // Send verification success email
+    if (process.env.RESEND_API_KEY) {
+      resend.emails.send({
+        from: 'HTS Swag <noreply@htswag.net>',
+        to: [trimmedEmail],
+        subject: 'Email verified — HTS Swag',
+        html: `
+          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+            <h1 style="color:#181d25;">HTS <span style="color:#f55266;">SWAG</span></h1>
+            <h2 style="color:#181d25;">Email verified successfully!</h2>
+            <p style="color:#4e5562;">Your email has been verified. You can now continue with your account creation.</p>
+            <p style="color:#6c727f;font-size:12px;">© ${new Date().getFullYear()} HTS Swag</p>
+          </div>
+        `,
+      }).catch((e) => console.warn('Verify email notification:', e));
+    }
 
     return res.status(200).json({ success: true, userExists });
   } catch (err) {

@@ -1,7 +1,10 @@
 // src/pages/AdminPanel.tsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Plus, Edit, Trash2, Save, X, Upload, Search, Filter, Download } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Upload, Search, Filter, Download, Package, Megaphone, ShoppingBag } from 'lucide-react';
+
+const ADMIN_EMAIL = 'tarunmass932007@gmail.com';
 
 interface Product {
   id?: string;
@@ -15,9 +18,24 @@ interface Product {
   created_at?: string;
 }
 
+interface AdminOrder {
+  id: string;
+  user_id: string;
+  total_amount: number;
+  currency: string;
+  status: string;
+  shipping_stage?: string;
+  created_at: string;
+  shipping_address?: { email?: string; firstName?: string; lastName?: string } | null;
+}
+
 export const AdminPanel: React.FC = () => {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'broadcast'>('products');
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [broadcastMessage, setBroadcastMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -45,7 +63,20 @@ export const AdminPanel: React.FC = () => {
   ];
 
   useEffect(() => {
-    fetchProducts();
+    const checkAdmin = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/login');
+        return;
+      }
+      if (session.user.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        navigate('/');
+        return;
+      }
+      fetchProducts();
+      fetchOrders();
+    };
+    checkAdmin();
   }, []);
 
   useEffect(() => {
@@ -79,6 +110,50 @@ export const AdminPanel: React.FC = () => {
       setFilteredProducts(data);
     }
     setLoading(false);
+  };
+
+  const fetchOrders = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || session.user.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) return;
+
+    const res = await fetch('/api/admin-orders', {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    const json = await res.json();
+    if (res.ok && json.orders) {
+      setOrders(json.orders);
+    }
+  };
+
+  const updateOrderStatus = async (orderId: string, status: string, shipping_stage?: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const res = await fetch('/api/admin-update-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ orderId, status, shipping_stage }),
+    });
+    const json = await res.json();
+    if (res.ok) {
+      alert('✅ Order updated! Changes will reflect for the user.');
+      fetchOrders();
+    } else {
+      alert('❌ ' + (json.error || 'Failed to update'));
+    }
+  };
+
+  const sendBroadcast = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!broadcastMessage.trim()) return;
+
+    const { error } = await supabase.from('broadcasts').insert({ message: broadcastMessage.trim() });
+    if (!error) {
+      alert('✅ Broadcast sent! All users will see it.');
+      setBroadcastMessage('');
+    } else {
+      alert('❌ ' + error.message);
+    }
   };
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -285,34 +360,158 @@ export const AdminPanel: React.FC = () => {
               🛠️ Admin Panel
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Manage your products • <span className="font-bold text-red-600">{products.length}</span> total items
+              Manage products, orders & broadcasts
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={exportProducts}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg"
-            >
-              <Download size={20} />
-              Export CSV
-            </button>
-            <button
-              onClick={addAllSampleProducts}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg"
-            >
-              <Upload size={20} />
-              Add 50+ Products
-            </button>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg"
-            >
-              <Plus size={20} />
-              Add Product
-            </button>
-          </div>
+          {activeTab === 'products' && (
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={exportProducts}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg"
+              >
+                <Download size={20} />
+                Export CSV
+              </button>
+              <button
+                onClick={addAllSampleProducts}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg"
+              >
+                <Upload size={20} />
+                Add 50+ Products
+              </button>
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg"
+              >
+                <Plus size={20} />
+                Add Product
+              </button>
+            </div>
+          )}
         </div>
 
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
+          {[
+            { id: 'products' as const, label: 'Products', icon: Package },
+            { id: 'orders' as const, label: 'Orders', icon: ShoppingBag },
+            { id: 'broadcast' as const, label: 'Broadcast', icon: Megaphone },
+          ].map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`flex items-center gap-2 px-4 py-3 font-semibold border-b-2 transition-colors ${
+                activeTab === id
+                  ? 'border-red-600 text-red-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <Icon size={18} />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Broadcast Tab */}
+        {activeTab === 'broadcast' && (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 mb-8 shadow-lg border border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Send Broadcast</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Your message will appear as a flowing banner at the top of the site for all users.
+            </p>
+            <form onSubmit={sendBroadcast} className="flex gap-3">
+              <input
+                type="text"
+                value={broadcastMessage}
+                onChange={(e) => setBroadcastMessage(e.target.value)}
+                placeholder="Enter broadcast message..."
+                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                maxLength={200}
+              />
+              <button type="submit" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold">
+                Send Broadcast
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Orders Tab */}
+        {activeTab === 'orders' && (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden mb-8 shadow-lg border border-gray-200 dark:border-gray-700">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Manage Orders</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Updates will reflect instantly for users in their Orders page.</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-100 dark:bg-gray-700">
+                  <tr>
+                    <th className="px-4 py-4 text-left text-sm font-bold">Order ID</th>
+                    <th className="px-4 py-4 text-left text-sm font-bold">Customer</th>
+                    <th className="px-4 py-4 text-left text-sm font-bold">Total</th>
+                    <th className="px-4 py-4 text-left text-sm font-bold">Status</th>
+                    <th className="px-4 py-4 text-left text-sm font-bold">Shipping</th>
+                    <th className="px-4 py-4 text-right text-sm font-bold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                        No orders yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    orders.map((order) => (
+                      <tr key={order.id} className="border-t border-gray-200 dark:border-gray-700">
+                        <td className="px-4 py-3 font-mono text-sm">#{order.id.slice(0, 8)}</td>
+                        <td className="px-4 py-3 text-sm">
+                          {order.shipping_address?.firstName} {order.shipping_address?.lastName}
+                          {order.shipping_address?.email && (
+                            <span className="block text-gray-500 text-xs">{order.shipping_address.email}</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 font-semibold">${order.total_amount}</td>
+                        <td className="px-4 py-3">
+                          <select
+                            value={order.status}
+                            onChange={(e) => updateOrderStatus(order.id, e.target.value, order.shipping_stage)}
+                            className="text-sm border rounded-lg px-2 py-1 bg-white dark:bg-gray-700"
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="refunded">Refunded</option>
+                          </select>
+                        </td>
+                        <td className="px-4 py-3">
+                          <select
+                            value={order.shipping_stage || 'ordered'}
+                            onChange={(e) => updateOrderStatus(order.id, order.status, e.target.value)}
+                            className="text-sm border rounded-lg px-2 py-1 bg-white dark:bg-gray-700"
+                          >
+                            <option value="ordered">Ordered</option>
+                            <option value="preparing">Preparing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                          </select>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <span className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString()}</span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Products Tab */}
+        {activeTab === 'products' && (
+        <>
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border-l-4 border-blue-500">
@@ -621,6 +820,8 @@ export const AdminPanel: React.FC = () => {
             </table>
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

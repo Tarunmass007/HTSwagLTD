@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
+import { Resend } from 'resend';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+const resend = new Resend(process.env.RESEND_API_KEY);
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 type Res = { status: (n: number) => Res; json: (o: object) => void };
@@ -89,6 +91,24 @@ export default async function handler(
 
     // 3. Mark OTP as used
     await supabase.from('email_otps').update({ used: true }).eq('id', record.id);
+
+    // 4. Send welcome email
+    if (process.env.RESEND_API_KEY) {
+      resend.emails.send({
+        from: 'HTS Swag <noreply@htswag.net>',
+        to: [trimmedEmail],
+        subject: 'Welcome to HTS Swag!',
+        html: `
+          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+            <h1 style="color:#181d25;">HTS <span style="color:#f55266;">SWAG</span></h1>
+            <h2 style="color:#181d25;">Welcome to HTS Swag!</h2>
+            <p style="color:#4e5562;">Your account has been created successfully. You can now sign in and start shopping.</p>
+            <a href="https://htswag.net/login" style="display:inline-block;padding:12px 24px;background:#f55266;color:white;text-decoration:none;border-radius:8px;font-weight:600;margin-top:16px;">Sign in</a>
+            <p style="color:#6c727f;font-size:12px;margin-top:24px;">© ${new Date().getFullYear()} HTS Swag</p>
+          </div>
+        `,
+      }).catch((e) => console.warn('Welcome email:', e));
+    }
 
     return res.status(200).json({ success: true });
   } catch (err) {

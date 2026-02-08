@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrencyLanguage } from '../context/CurrencyLanguageContext';
 import { supabase } from '../lib/supabase';
@@ -17,6 +18,7 @@ interface Order {
   total_amount: number;
   currency: string;
   status: string;
+  shipping_stage?: string;
   created_at: string;
   shipping_address?: {
     email?: string;
@@ -50,47 +52,62 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate, selectedOrde
   const [loading, setLoading] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(initialOrderId || null);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      if (!isAuthenticated) {
-        setLoading(false);
-        return;
-      }
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setLoading(false);
-        return;
-      }
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          id,
-          total_amount,
-          currency,
-          status,
-          created_at,
-          shipping_address,
-          payment_info,
-          order_items (
-            id,
-            quantity,
-            price,
-            product:products(name, image_url)
-          )
-        `)
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false });
-
-      if (!error && data) {
-        setOrders(data as Order[]);
-        if (initialOrderId && data.length > 0) {
-          setSelectedOrderId(initialOrderId);
-        }
-      }
+  const fetchOrders = async () => {
+    if (!isAuthenticated) {
       setLoading(false);
-    };
+      return;
+    }
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setLoading(false);
+      return;
+    }
+    const { data, error } = await supabase
+      .from('orders')
+      .select(`
+        id,
+        total_amount,
+        currency,
+        status,
+        shipping_stage,
+        created_at,
+        shipping_address,
+        payment_info,
+        order_items (
+          id,
+          quantity,
+          price,
+          product:products(name, image_url)
+        )
+      `)
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setOrders(data as Order[]);
+      if (urlOrderId && data.some((o: Order) => o.id === urlOrderId)) {
+        setSelectedOrderId(urlOrderId);
+      }
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
     fetchOrders();
-  }, [isAuthenticated, initialOrderId]);
+  }, [isAuthenticated, urlOrderId]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const channel = supabase
+      .channel('orders-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        fetchOrders();
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAuthenticated]);
 
   const formatOrderId = (id: string) => {
     if (!id) return '—';
@@ -104,6 +121,22 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate, selectedOrde
     if (s === 'cancelled') return { label: 'Canceled', color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-900/20', Icon: XCircle };
     if (s === 'refunded') return { label: 'Refunded', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20', Icon: XCircle };
     return { label: 'Pending', color: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-50 dark:bg-gray-800/50', Icon: Package };
+  };
+
+  const SHIPPING_STAGES = [
+    { key: 'ordered', label: 'Order Placed', icon: Package },
+    { key: 'preparing', label: 'Preparing', icon: Truck },
+    { key: 'shipped', label: 'Shipped', icon: Truck },
+    { key: 'delivered', label: 'Delivered', icon: CheckCircle },
+  ];
+
+  const getShippingProgress = (order: Order) => {
+    const stage = order.shipping_stage || 'ordered';
+    const idx = SHIPPING_STAGES.findIndex((s) => s.key === stage);
+    const currentIdx = idx >= 0 ? idx : 0;
+    const percent = ((currentIdx + 1) / SHIPPING_STAGES.length) * 100;
+    if (order.status === 'cancelled' || order.status === 'refunded') return { percent: 0, currentIdx: -1 };
+    return { percent, currentIdx };
   };
 
   const getOrderItemProduct = (item: OrderItem) => item.product || item.products || null;
@@ -147,8 +180,8 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate, selectedOrde
             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
               <Package size={40} className="text-gray-400" />
             </div>
-            <h2 className="font-display text-2xl md:text-3xl font-semibold text-[rgb(var(--color-foreground))] mb-3">No orders yet</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-8">Start shopping to see your orders here</p>
+            <h2 className="font-display text-2xl md:text-3xl font-semibold text-[rgb(var(--color-foreground))] mb-3">No orders found</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-8">You haven&apos;t placed any orders yet. Start shopping to see your orders here.</p>
             <button
               onClick={() => onNavigate('products')}
               className="btn-store-primary inline-flex items-center gap-2 px-8 py-3.5"
@@ -176,7 +209,7 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate, selectedOrde
       <div className="min-h-screen py-16 bg-gray-50 dark:bg-gray-950">
         <div className="section-store max-w-3xl mx-auto">
           <button
-            onClick={() => setSelectedOrderId(null)}
+            onClick={() => { setSelectedOrderId(null); navigate('/orders'); }}
             className="mb-6 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[rgb(var(--color-foreground))] transition-colors"
           >
             <ChevronLeft size={20} />
@@ -191,6 +224,33 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate, selectedOrde
               Confirmed {new Date(selectedOrder.created_at).toLocaleDateString()}
             </p>
           </div>
+
+          {(selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'refunded') && (
+            <div className="mb-6 bg-white dark:bg-gray-900 rounded-2xl p-6 border border-[var(--border-subtle)] shadow-store">
+              <h3 className="font-semibold text-[rgb(var(--color-foreground))] mb-4">Shipping progress</h3>
+              <div className="flex items-center justify-between gap-2 mb-2">
+                {SHIPPING_STAGES.map((s, i) => (
+                  <span
+                    key={s.key}
+                    className={`text-xs font-medium flex items-center gap-1 ${
+                      i <= getShippingProgress(selectedOrder).currentIdx
+                        ? 'text-primary'
+                        : 'text-gray-400 dark:text-gray-500'
+                    }`}
+                  >
+                    <s.icon size={14} />
+                    {s.label}
+                  </span>
+                ))}
+              </div>
+              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all duration-500 rounded-full"
+                  style={{ width: `${getShippingProgress(selectedOrder).percent}%` }}
+                />
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Status card */}
@@ -301,7 +361,6 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate, selectedOrde
         <h1 className="font-display text-3xl md:text-4xl font-semibold text-[rgb(var(--color-foreground))] mb-8">Your orders</h1>
         <div className="space-y-4">
           {orders.map((order) => {
-            const isExpanded = expandedOrderId === order.id;
             const statusCfg = getStatusConfig(order.status);
             const itemCount = order.order_items?.length ?? 0;
 
@@ -311,7 +370,7 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate, selectedOrde
                 className="bg-white dark:bg-gray-900 rounded-2xl shadow-store border border-[var(--border-subtle)] overflow-hidden"
               >
                 <button
-                  onClick={() => setSelectedOrderId(order.id)}
+                  onClick={() => { setSelectedOrderId(order.id); navigate(`/orders/${order.id}`); }}
                   className="w-full p-6 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-4">
@@ -332,6 +391,31 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({ onNavigate, selectedOrde
                       <ArrowRight size={20} className="text-gray-400" />
                     </div>
                   </div>
+                  {(order.status !== 'cancelled' && order.status !== 'refunded') && (
+                    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        {SHIPPING_STAGES.map((s, i) => (
+                          <span
+                            key={s.key}
+                            className={`text-xs font-medium flex items-center gap-1 ${
+                              i <= getShippingProgress(order).currentIdx
+                                ? 'text-primary'
+                                : 'text-gray-400 dark:text-gray-500'
+                            }`}
+                          >
+                            <s.icon size={12} />
+                            {s.label}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary transition-all duration-500 rounded-full"
+                          style={{ width: `${getShippingProgress(order).percent}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </button>
               </div>
             );
