@@ -11,22 +11,24 @@ export const BroadcastBanner: React.FC = () => {
       const { data } = await supabase
         .from('broadcasts')
         .select('id, message')
+        .eq('active', true)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
       if (data?.message) setBroadcast(data);
+      else setBroadcast(null);
     };
     fetchLatest();
 
-    const sub = supabase
-      .channel('broadcasts')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'broadcasts' }, () => {
+    const channel = supabase
+      .channel('broadcasts-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'broadcasts' }, () => {
         fetchLatest();
       })
       .subscribe();
 
     return () => {
-      sub.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, []);
 

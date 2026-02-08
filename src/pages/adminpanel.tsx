@@ -2,9 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Plus, Edit, Trash2, Save, X, Upload, Search, Filter, Download, Package, Megaphone, ShoppingBag } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Upload, Search, Filter, Download, Package, Megaphone, ShoppingBag, XCircle } from 'lucide-react';
 
 const ADMIN_EMAIL = 'tarunmass932007@gmail.com';
+
+interface Broadcast {
+  id: string;
+  message: string;
+  active: boolean;
+  created_at: string;
+}
 
 interface Product {
   id?: string;
@@ -35,6 +42,7 @@ export const AdminPanel: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -75,6 +83,7 @@ export const AdminPanel: React.FC = () => {
       }
       fetchProducts();
       fetchOrders();
+      fetchBroadcasts();
     };
     checkAdmin();
   }, []);
@@ -143,14 +152,37 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
+  const fetchBroadcasts = async () => {
+    const { data, error } = await supabase
+      .from('broadcasts')
+      .select('id, message, active, created_at')
+      .order('created_at', { ascending: false });
+    if (!error && data) setBroadcasts(data as Broadcast[]);
+  };
+
   const sendBroadcast = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!broadcastMessage.trim()) return;
 
-    const { error } = await supabase.from('broadcasts').insert({ message: broadcastMessage.trim() });
+    const { error } = await supabase.from('broadcasts').insert({
+      message: broadcastMessage.trim(),
+      active: true,
+    });
     if (!error) {
       alert('✅ Broadcast sent! All users will see it.');
       setBroadcastMessage('');
+      fetchBroadcasts();
+    } else {
+      alert('❌ ' + error.message);
+    }
+  };
+
+  const cancelBroadcast = async (id: string) => {
+    if (!confirm('Cancel this broadcast? It will stop showing for all users.')) return;
+    const { error } = await supabase.from('broadcasts').update({ active: false }).eq('id', id);
+    if (!error) {
+      alert('✅ Broadcast cancelled.');
+      fetchBroadcasts();
     } else {
       alert('❌ ' + error.message);
     }
@@ -414,24 +446,73 @@ export const AdminPanel: React.FC = () => {
 
         {/* Broadcast Tab */}
         {activeTab === 'broadcast' && (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 mb-8 shadow-lg border border-gray-200 dark:border-gray-700">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Send Broadcast</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              Your message will appear as a flowing banner at the top of the site for all users.
-            </p>
-            <form onSubmit={sendBroadcast} className="flex gap-3">
-              <input
-                type="text"
-                value={broadcastMessage}
-                onChange={(e) => setBroadcastMessage(e.target.value)}
-                placeholder="Enter broadcast message..."
-                className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                maxLength={200}
-              />
-              <button type="submit" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold">
-                Send Broadcast
-              </button>
-            </form>
+          <div className="space-y-6 mb-8">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Send Broadcast</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Your message will appear as a flowing banner at the top of the site for all users.
+              </p>
+              <form onSubmit={sendBroadcast} className="flex gap-3">
+                <input
+                  type="text"
+                  value={broadcastMessage}
+                  onChange={(e) => setBroadcastMessage(e.target.value)}
+                  placeholder="Enter broadcast message..."
+                  className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  maxLength={200}
+                />
+                <button type="submit" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold">
+                  Send Broadcast
+                </button>
+              </form>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Active Broadcasts</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Cancel a broadcast to stop it from showing for all users.</p>
+              </div>
+              <div className="overflow-x-auto">
+                {broadcasts.length === 0 ? (
+                  <div className="p-8 text-center text-gray-500 dark:text-gray-400">No broadcasts yet.</div>
+                ) : (
+                  <table className="w-full">
+                    <thead className="bg-gray-100 dark:bg-gray-700">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-bold">Message</th>
+                        <th className="px-4 py-3 text-left text-sm font-bold">Status</th>
+                        <th className="px-4 py-3 text-left text-sm font-bold">Sent</th>
+                        <th className="px-4 py-3 text-right text-sm font-bold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {broadcasts.map((b) => (
+                        <tr key={b.id} className="border-t border-gray-200 dark:border-gray-700">
+                          <td className="px-4 py-3 text-sm max-w-md truncate">{b.message}</td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${b.active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-400'}`}>
+                              {b.active ? 'Active' : 'Cancelled'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-500">{new Date(b.created_at).toLocaleString()}</td>
+                          <td className="px-4 py-3 text-right">
+                            {b.active && (
+                              <button
+                                onClick={() => cancelBroadcast(b.id)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 transition-colors"
+                              >
+                                <XCircle size={16} />
+                                Cancel Broadcast
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
