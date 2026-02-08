@@ -72,6 +72,13 @@ export const AdminPanel: React.FC = () => {
     { value: 'gift-cards', label: 'Gift Cards' }
   ];
 
+  const getAdminSession = async () => {
+    const { data: { session }, error } = await supabase.auth.refreshSession();
+    if (error || !session) return null;
+    if (session.user.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) return null;
+    return session;
+  };
+
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -124,8 +131,8 @@ export const AdminPanel: React.FC = () => {
   };
 
   const fetchOrders = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session || session.user.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) return;
+    const session = await getAdminSession();
+    if (!session) return;
 
     setOrdersLoading(true);
     setOrdersError(null);
@@ -148,8 +155,12 @@ export const AdminPanel: React.FC = () => {
   };
 
   const updateOrderStatus = async (orderId: string, status: string, shipping_stage?: string) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
+    const session = await getAdminSession();
+    if (!session) {
+      alert('❌ Session expired. Please sign in again.');
+      navigate('/login');
+      return;
+    }
 
     const apiBase = import.meta.env.VITE_API_URL || '';
     const res = await fetch(`${apiBase}/api/admin-update-order`, {
@@ -193,9 +204,10 @@ export const AdminPanel: React.FC = () => {
 
   const cancelBroadcast = async (id: string) => {
     if (!confirm('Cancel this broadcast? It will stop showing for all users.')) return;
-    const { data: { session } } = await supabase.auth.getSession();
+    const session = await getAdminSession();
     if (!session) {
-      alert('❌ Please sign in again.');
+      alert('❌ Session expired. Please sign in again.');
+      navigate('/login');
       return;
     }
     const apiBase = import.meta.env.VITE_API_URL || '';
@@ -209,7 +221,12 @@ export const AdminPanel: React.FC = () => {
       alert('✅ Broadcast cancelled.');
       fetchBroadcasts();
     } else {
-      alert('❌ ' + (json.error || 'Failed to cancel'));
+      if (res.status === 401) {
+        alert('❌ Session expired. Please sign in again.');
+        navigate('/login');
+      } else {
+        alert('❌ ' + (json.error || 'Failed to cancel'));
+      }
     }
   };
 
