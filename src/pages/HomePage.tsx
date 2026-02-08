@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Gift, ShoppingBag, Sparkles, ArrowRight, Star, TrendingUp, Award, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Gift, ShoppingBag, Sparkles, ArrowRight, Star, TrendingUp, Award, Zap, ChevronLeft, ChevronRight, Truck, Lock, DollarSign, MessageCircle, Palette, BadgeCheck } from 'lucide-react';
 import { useCurrencyLanguage } from '../context/CurrencyLanguageContext';
 import { testimonialsData } from '../data/testimonials';
 
@@ -34,13 +34,15 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <div className="section-store">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
-              { icon: '🚚', title: 'Free Shipping & Returns', desc: 'For all orders over $50' },
-              { icon: '🔒', title: 'Secure Payment', desc: 'We ensure secure payment' },
-              { icon: '💰', title: 'Money Back Guarantee', desc: 'Returning money 30 days' },
-              { icon: '💬', title: '24/7 Customer Support', desc: 'Friendly customer support' },
-            ].map(({ icon, title, desc }) => (
+              { icon: Truck, title: 'Free Shipping & Returns', desc: 'For all orders over $50' },
+              { icon: Lock, title: 'Secure Payment', desc: 'We ensure secure payment' },
+              { icon: DollarSign, title: 'Money Back Guarantee', desc: 'Returning money 30 days' },
+              { icon: MessageCircle, title: '24/7 Customer Support', desc: 'Friendly customer support' },
+            ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex flex-col items-center">
-                <span className="text-2xl mb-2">{icon}</span>
+                <div className="w-11 h-11 rounded-store-lg bg-primary/10 flex items-center justify-center mb-2">
+                  <Icon size={22} className="text-primary" />
+                </div>
                 <h3 className="font-semibold text-[rgb(var(--color-foreground))] text-sm">{title}</h3>
                 <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">{desc}</p>
               </div>
@@ -276,13 +278,15 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: 'custom', title: t('customDesigns'), desc: t('customDesignsDesc') },
-              { icon: 'ship', title: t('fastShipping'), desc: t('fastShippingDesc') },
-              { icon: 'quality', title: t('qualityGuaranteed'), desc: t('qualityDesc') },
-              { icon: 'support', title: t('support247'), desc: t('supportDesc') },
-            ].map(({ icon, title, desc }) => (
+              { icon: Palette, title: t('customDesigns'), desc: t('customDesignsDesc') },
+              { icon: Zap, title: t('fastShipping'), desc: t('fastShippingDesc') },
+              { icon: BadgeCheck, title: t('qualityGuaranteed'), desc: t('qualityDesc') },
+              { icon: MessageCircle, title: t('support247'), desc: t('supportDesc') },
+            ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="p-6 rounded-store-lg border border-[var(--border-subtle)] bg-white dark:bg-gray-900/20 text-center hover:shadow-store transition-shadow">
-                <div className="text-3xl mb-3">{icon === 'custom' ? '🎨' : icon === 'ship' ? '⚡' : icon === 'quality' ? '💯' : '💬'}</div>
+                <div className="w-14 h-14 rounded-store-lg bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                  <Icon size={28} className="text-primary" />
+                </div>
                 <h3 className="font-display text-lg font-semibold text-[rgb(var(--color-foreground))] mb-2">{title}</h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">{desc}</p>
               </div>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Plus, Edit, Trash2, Save, X, Upload, Search, Filter, Download, Package, Megaphone, ShoppingBag, XCircle, LogOut } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Upload, Search, Filter, Download, Package, Megaphone, ShoppingBag, XCircle, LogOut, Wrench } from 'lucide-react';
 
 const ADMIN_EMAIL = 'tarunmass932007@gmail.com';
 
@@ -431,7 +431,7 @@ export const AdminPanel: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <div>
             <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-2">
-              🛠️ Admin Panel
+              <span className="inline-flex items-center gap-2"><Wrench size={24} /> Admin Panel</span>
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage products, orders & broadcasts

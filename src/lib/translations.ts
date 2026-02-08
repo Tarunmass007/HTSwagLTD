@@ -15,7 +15,7 @@ export const translations = {
       heroSubtitle: "Discover thousands of custom designs, vinyl decals, printed stickers, and exclusive gift cards.",
       heroSubtitle2: "Your one-stop shop for premium swag!",
       shopNow: "Shop Now",
-      freeShipping: "🔥 Free Shipping on Orders Over $50",
+      freeShipping: "Free Shipping on Orders Over $50",
       
       // Trust Badges
       fiveStarReviews: "5-Star Reviews",
@@ -138,7 +138,7 @@ export const translations = {
       heroSubtitle: "Descubre miles de diseños personalizados, calcomanías de vinilo, pegatinas impresas y tarjetas de regalo exclusivas.",
       heroSubtitle2: "¡Tu tienda única para merchandising premium!",
       shopNow: "Comprar Ahora",
-      freeShipping: "🔥 Envío Gratis en Pedidos Superiores a $50",
+      freeShipping: "Envío Gratis en Pedidos Superiores a $50",
       
       // Trust Badges
       fiveStarReviews: "Reseñas de 5 Estrellas",
@@ -261,7 +261,7 @@ export const translations = {
       heroSubtitle: "Découvrez des milliers de designs personnalisés, autocollants en vinyle, stickers imprimés et cartes cadeaux exclusives.",
       heroSubtitle2: "Votre boutique unique pour des produits premium!",
       shopNow: "Acheter Maintenant",
-      freeShipping: "🔥 Livraison Gratuite pour Commandes de Plus de 50$",
+      freeShipping: "Livraison Gratuite pour Commandes de Plus de 50$",
       
       // Trust Badges
       fiveStarReviews: "Avis 5 Étoiles",

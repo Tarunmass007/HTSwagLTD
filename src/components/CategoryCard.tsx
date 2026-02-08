@@ -1,6 +1,10 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Shirt, Layers, Package, Award, ShoppingBag, Coffee, Sparkles, Gift, LucideIcon } from 'lucide-react';
 import { ProductCategory } from '../Types/categories';
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Shirt, Layers, Package, Award, ShoppingBag, Coffee, Sparkles, Gift,
+};
 
 interface CategoryCardProps {
   category: ProductCategory;
@@ -8,6 +12,7 @@ interface CategoryCardProps {
 }
 
 export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onClick }) => {
+  const IconComponent = ICON_MAP[category.icon] || Package;
   return (
     <div
       onClick={onClick}
@@ -21,8 +26,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onClick })
         />
         <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity`} />
         
-        <div className="absolute top-4 right-4 w-12 h-12 rounded-store bg-white/95 dark:bg-gray-900/95 flex items-center justify-center text-2xl shadow-store">
-          {category.icon}
+        <div className="absolute top-4 right-4 w-12 h-12 rounded-store bg-white/95 dark:bg-gray-900/95 flex items-center justify-center shadow-store">
+          <IconComponent size={24} className="text-[rgb(var(--color-foreground))]" />
         </div>
 
         <span className="absolute bottom-4 left-4 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white text-xs font-semibold">

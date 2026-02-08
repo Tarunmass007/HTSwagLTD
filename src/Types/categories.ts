@@ -4,7 +4,7 @@ export interface ProductCategory {
     id: string;
     name: string;
     description: string;
-    icon: string;
+    icon: string; // Lucide icon name
     image: string;
     itemCount: number;
     color: string;
@@ -15,7 +15,7 @@ export interface ProductCategory {
       id: 'tops',
       name: 'Tops & T-Shirts',
       description: 'Custom printed t-shirts, polo shirts, and tank tops',
-      icon: '👕',
+      icon: 'Shirt',
       image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
       itemCount: 45,
       color: 'from-blue-500 to-blue-700'
@@ -24,7 +24,7 @@ export interface ProductCategory {
       id: 'hoodies',
       name: 'Hoodies & Sweatshirts',
       description: 'Comfortable hoodies and crew neck sweatshirts',
-      icon: '🧥',
+      icon: 'Layers',
       image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
       itemCount: 32,
       color: 'from-purple-500 to-purple-700'
@@ -33,7 +33,7 @@ export interface ProductCategory {
       id: 'bottoms',
       name: 'Bottoms',
       description: 'Pants, shorts, joggers, and athletic wear',
-      icon: '👖',
+      icon: 'Package',
       image: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=400',
       itemCount: 28,
       color: 'from-green-500 to-green-700'
@@ -42,7 +42,7 @@ export interface ProductCategory {
       id: 'headwear',
       name: 'Hats & Caps',
       description: 'Baseball caps, beanies, snapbacks, and visors',
-      icon: '🧢',
+      icon: 'Award',
       image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400',
       itemCount: 38,
       color: 'from-red-500 to-red-700'
@@ -51,7 +51,7 @@ export interface ProductCategory {
       id: 'accessories',
       name: 'Accessories',
       description: 'Bags, belts, socks, wristbands, and more',
-      icon: '🎒',
+      icon: 'ShoppingBag',
       image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400',
       itemCount: 52,
       color: 'from-yellow-500 to-orange-600'
@@ -60,7 +60,7 @@ export interface ProductCategory {
       id: 'drinkware',
       name: 'Drinkware',
       description: 'Water bottles, tumblers, mugs, and koozies',
-      icon: '🥤',
+      icon: 'Coffee',
       image: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400',
       itemCount: 24,
       color: 'from-cyan-500 to-blue-600'
@@ -69,7 +69,7 @@ export interface ProductCategory {
       id: 'stickers',
       name: 'Stickers & Decals',
       description: 'Vinyl stickers, car decals, and laptop stickers',
-      icon: '✨',
+      icon: 'Sparkles',
       image: 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400',
       itemCount: 67,
       color: 'from-pink-500 to-rose-600'
@@ -78,7 +78,7 @@ export interface ProductCategory {
       id: 'gift-cards',
       name: 'Gift Cards',
       description: 'Digital and physical gift cards',
-      icon: '🎁',
+      icon: 'Gift',
       image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=400',
       itemCount: 8,
       color: 'from-indigo-500 to-purple-600'
