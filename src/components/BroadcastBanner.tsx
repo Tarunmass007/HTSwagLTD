@@ -52,8 +52,8 @@ export const BroadcastBanner: React.FC = () => {
 
   return (
     <div className="relative overflow-hidden bg-[rgb(var(--color-foreground))] text-[rgb(var(--color-background))] py-2 text-xs md:text-sm font-medium">
-      <div className="overflow-hidden">
-        <div className="animate-marquee inline-flex items-center flex-nowrap min-w-max">
+      <div className="overflow-hidden w-full flex justify-end pr-10">
+        <div className="animate-marquee-rtl inline-flex items-center flex-nowrap min-w-max">
           <WordChunk copyId={1} />
           <span className="flex-shrink-0 w-16 min-w-[4rem]" aria-hidden />
           <WordChunk copyId={2} />

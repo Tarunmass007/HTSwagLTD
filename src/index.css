@@ -178,12 +178,13 @@ button, a, input, select, textarea {
   100% { background-position: -200% 0; }
 }
 
-@keyframes marquee {
+/* Right-to-left marquee: starts at right edge, flows left. Seamless loop with 3 copies. */
+@keyframes marquee-rtl {
   0% { transform: translateX(0); }
   100% { transform: translateX(-33.333%); }
 }
 
-.animate-marquee {
-  animation: marquee 35s linear infinite;
+.animate-marquee-rtl {
+  animation: marquee-rtl 40s linear infinite;
   will-change: transform;
 }

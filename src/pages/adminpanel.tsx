@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Plus, Edit, Trash2, Save, X, Upload, Search, Filter, Download, Package, Megaphone, ShoppingBag, XCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Upload, Search, Filter, Download, Package, Megaphone, ShoppingBag, XCircle, LogOut } from 'lucide-react';
 
 const ADMIN_EMAIL = 'tarunmass932007@gmail.com';
 
@@ -437,6 +437,16 @@ export const AdminPanel: React.FC = () => {
               Manage products, orders & broadcasts
             </p>
           </div>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut({ scope: 'local' });
+              navigate('/', { replace: true });
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
+          >
+            <LogOut size={18} />
+            Sign out
+          </button>
           {activeTab === 'products' && (
             <div className="flex flex-wrap gap-3">
               <button

@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, User, ChevronDown, Moon, Sun, Menu, X, Home, Package, Gift, Flame, Grid, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeProvider';
 import { useCurrencyLanguage, languages, currencies } from '../context/CurrencyLanguageContext';
+import { supabase } from '../lib/supabase';
 interface HeaderProps {
   onNavigate: (page: string, category?: string) => void;
   onSearch: (query: string) => void;
@@ -35,9 +37,9 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
   }, []);
 
   const handleLogout = async () => {
-    const { supabase } = await import('../lib/supabase');
-    await supabase.auth.signOut();
     setShowUserMenu(false);
+    await supabase.auth.signOut({ scope: 'local' });
+    navigate('/', { replace: true });
   };
 
   const handleSearch = (e: React.FormEvent) => {
