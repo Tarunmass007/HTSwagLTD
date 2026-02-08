@@ -24,6 +24,13 @@ html.dark {
   --text-body: #cad0d9;
 }
 
+/* Footer: always dark bg with light text for visibility in both themes */
+:root, html.dark {
+  --footer-bg: 24 29 37;
+  --footer-text: 243 244 246;
+  --footer-text-muted: 209 213 219;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

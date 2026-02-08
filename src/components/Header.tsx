@@ -54,18 +54,18 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
 
   return (
     <>
-      {/* Announcement bar */}
-      <div className="bg-[rgb(var(--color-foreground))] text-[rgb(var(--color-background))] py-2.5 px-4">
+      {/* Announcement bar - fixed dark for visibility in both themes */}
+      <div className="bg-[rgb(var(--footer-bg))] text-[rgb(var(--footer-text))] py-2.5 px-4">
         <div className="section-store flex items-center justify-between text-xs md:text-sm">
           <div className="flex items-center gap-6">
-            <span className="hidden md:inline opacity-90">Free shipping on orders over $50</span>
-            <span className="hidden md:inline opacity-75">support@htswag.com</span>
+            <span className="hidden md:inline text-[rgb(var(--footer-text))]">Free shipping on orders over $50</span>
+            <span className="hidden md:inline text-[rgb(var(--footer-text-muted))]">support@htswag.com</span>
           </div>
           <div className="flex items-center gap-4">
             <div className="relative" ref={langMenuRef}>
               <button
                 onClick={() => { setShowLanguageMenu(!showLanguageMenu); setShowCurrencyMenu(false); }}
-                className="flex items-center gap-1.5 opacity-90 hover:opacity-100 transition-opacity"
+                className="flex items-center gap-1.5 text-[rgb(var(--footer-text))] hover:text-white transition-colors"
               >
                 <span>{language.flag}</span>
                 <span className="hidden sm:inline">{language.code.toUpperCase()}</span>
@@ -91,7 +91,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onSearch }) => {
             <div className="relative" ref={currMenuRef}>
               <button
                 onClick={() => { setShowCurrencyMenu(!showCurrencyMenu); setShowLanguageMenu(false); }}
-                className="flex items-center gap-1.5 opacity-90 hover:opacity-100 transition-opacity"
+                className="flex items-center gap-1.5 text-[rgb(var(--footer-text))] hover:text-white transition-colors"
               >
                 <span>{currency.symbol}</span>
                 <span className="hidden sm:inline">{currency.code}</span>

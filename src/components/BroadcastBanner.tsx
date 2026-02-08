@@ -51,7 +51,7 @@ export const BroadcastBanner: React.FC = () => {
   );
 
   return (
-    <div className="relative overflow-hidden bg-[rgb(var(--color-foreground))] text-[rgb(var(--color-background))] py-2 text-xs md:text-sm font-medium">
+    <div className="relative overflow-hidden bg-[rgb(var(--footer-bg))] text-[rgb(var(--footer-text))] py-2 text-xs md:text-sm font-medium">
       <div className="overflow-hidden w-full flex justify-end pr-10">
         <div className="animate-marquee-rtl inline-flex items-center flex-nowrap min-w-max">
           <WordChunk copyId={1} />
@@ -64,7 +64,7 @@ export const BroadcastBanner: React.FC = () => {
       </div>
       <button
         onClick={handleDismiss}
-        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded hover:bg-white/10 transition-colors z-10"
+        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded hover:bg-white/10 text-[rgb(var(--footer-text))] transition-colors z-10"
         aria-label="Dismiss"
       >
         <X size={16} />
